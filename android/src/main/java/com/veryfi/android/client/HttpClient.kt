@@ -1,36 +1,29 @@
 package com.veryfi.android.client
 
-data class HttpClientData(val clientId: String, val clientSecret: String, val username: String, val apiKey: String)
+import org.json.JSONObject
+import java.io.InputStream
 
-interface HttpClientInterface {
-    fun hello(): String
+data class HttpClientData(
+    val clientId: String,
+    val clientSecret: String,
+    val username: String,
+    val apiKey: String
+)
 
-    /**
+interface HttpClient {
+
     /**
      * Returns a json string [String] list of documents.
      * @return the list of previously processed documents [String]
      */
-    val documents: String?
-
-    /**
-     * Returns a json string [<] list of documents.
-     * @return the list of previously processed documents [String]
-     */
-    val documentsAsync: CompletableFuture<String?>?
+    fun getDocuments(): String
 
     /**
      * Returns a json string [String] document information
      * @param documentId ID of the document you'd like to retrieve.
      * @return the data extracted from the Document [String]
      */
-    fun getDocument(documentId: String?): String?
-
-    /**
-     * Returns a json string [<] document information.
-     * @param documentId ID of the document you'd like to retrieve.
-     * @return the data extracted from the Document [<]
-     */
-    fun getDocumentAsync(documentId: String?): CompletableFuture<String?>?
+    fun getDocument(documentId: String): String
 
     /**
      * Process a document and extract all the fields from it
@@ -41,22 +34,27 @@ interface HttpClientInterface {
      * @return the data extracted from the Document [String]
      */
     fun processDocument(
-        filePath: String?, categories: List<String?>?, deleteAfterProcessing: Boolean,
+        fileStream: InputStream,
+        fileName: String,
+        categories: List<String>,
+        deleteAfterProcessing: Boolean,
         parameters: JSONObject?
-    ): String?
+    ): String
 
     /**
-     * Process a document and extract all the fields from it
-     * @param filePath Path on disk to a file to submit for data extraction
-     * @param categories List of categories Veryfi can use to categorize the document
-     * @param deleteAfterProcessing Delete this document from Veryfi after data has been extracted
+     * Update data for a previously processed document, including almost any field like `vendor`, `date`, `notes` and etc.
+     * @param documentId ID of the document you'd like to update.
      * @param parameters Additional request parameters
-     * @return the data extracted from the Document [<]
+     * @return A document json with updated fields, if fields are writable. Otherwise a document with unchanged fields. [String]
      */
-    fun processDocumentAsync(
-        filePath: String?, categories: List<String?>?,
-        deleteAfterProcessing: Boolean, parameters: JSONObject?
-    ): CompletableFuture<String?>?
+    fun updateDocument(documentId: String, parameters: JSONObject?): String
+
+    /**
+     * Delete Document from Veryfi
+     * @param documentId ID of the document you'd like to delete.
+     * @return the response data. [String]
+     */
+    fun deleteDocument(documentId: String): String
 
     /**
      * Process Document from url and extract all the fields from it.
@@ -71,15 +69,46 @@ interface HttpClientInterface {
      * @return the data extracted from the Document [String]
      */
     fun processDocumentUrl(
-        fileUrl: String?,
-        fileUrls: List<String?>?,
-        categories: List<String?>?,
+        fileUrl: String,
+        fileUrls: List<String>?,
+        categories: List<String>?,
         deleteAfterProcessing: Boolean,
         maxPagesToProcess: Int,
         boostMode: Boolean,
         externalId: String?,
         parameters: JSONObject?
-    ): String?
+    ): String
+
+    /**
+    /**
+     * Returns a json string [<] list of documents.
+     * @return the list of previously processed documents [String]
+    */
+    val documentsAsync: CompletableFuture<String?>?
+
+
+    /**
+     * Returns a json string [<] document information.
+     * @param documentId ID of the document you'd like to retrieve.
+     * @return the data extracted from the Document [<]
+    */
+    fun getDocumentAsync(documentId: String?): CompletableFuture<String?>?
+
+
+    /**
+     * Process a document and extract all the fields from it
+     * @param filePath Path on disk to a file to submit for data extraction
+     * @param categories List of categories Veryfi can use to categorize the document
+     * @param deleteAfterProcessing Delete this document from Veryfi after data has been extracted
+     * @param parameters Additional request parameters
+     * @return the data extracted from the Document [<]
+    */
+    fun processDocumentAsync(
+    filePath: String?, categories: List<String?>?,
+    deleteAfterProcessing: Boolean, parameters: JSONObject?
+    ): CompletableFuture<String?>?
+
+
 
     /**
      * Process Document from url and extract all the fields from it.
@@ -92,67 +121,53 @@ interface HttpClientInterface {
      * @param externalId Optional custom document identifier. Use this if you would like to assign your own ID to documents
      * @param parameters Additional request parameters
      * @return the data extracted from the Document [<]
-     */
+    */
     fun processDocumentUrlAsync(
-        fileUrl: String?,
-        fileUrls: List<String?>?,
-        categories: List<String?>?,
-        deleteAfterProcessing: Boolean,
-        maxPagesToProcess: Int,
-        boostMode: Boolean,
-        externalId: String?,
-        parameters: JSONObject?
+    fileUrl: String?,
+    fileUrls: List<String?>?,
+    categories: List<String?>?,
+    deleteAfterProcessing: Boolean,
+    maxPagesToProcess: Int,
+    boostMode: Boolean,
+    externalId: String?,
+    parameters: JSONObject?
     ): CompletableFuture<String?>?
 
     /**
      * Delete Document from Veryfi
      * @param documentId ID of the document you'd like to delete.
-     * @return the response data. [String]
-     */
-    fun deleteDocument(documentId: String?): String?
-
-    /**
-     * Delete Document from Veryfi
-     * @param documentId ID of the document you'd like to delete.
      * @return the response data. [<]
-     */
+    */
     fun deleteDocumentAsync(documentId: String?): CompletableFuture<String?>?
 
-    /**
-     * Update data for a previously processed document, including almost any field like `vendor`, `date`, `notes` and etc.
-     * @param documentId ID of the document you'd like to update.
-     * @param parameters Additional request parameters
-     * @return A document json with updated fields, if fields are writable. Otherwise a document with unchanged fields. [String]
-     */
-    fun updateDocument(documentId: String?, parameters: JSONObject?): String?
 
     /**
      * Update data for a previously processed document, including almost any field like `vendor`, `date`, `notes` and etc.
      * @param documentId ID of the document you'd like to update.
      * @param parameters Additional request parameters
      * @return A document json with updated fields, if fields are writable. Otherwise a document with unchanged fields. [<]
-     */
+    */
     fun updateDocumentAsync(
-        documentId: String?,
-        parameters: JSONObject?
+    documentId: String?,
+    parameters: JSONObject?
     ): CompletableFuture<String?>?
 
     /**
      * Change the default API version
      * @param version of the API by default is 7
-     */
+    */
     fun setAPIVersion(version: Int)
 
     /**
      * Define new time out for the requests in seconds
      * @param timeOut of the http requests in seconds
-     */
+    */
     fun setTimeOut(timeOut: Int)
 
     /**
      * By default is https://api.veryfi.com/api/;
      * @param baseUrl for the Veryfi API
-     */
+    */
     fun setBaseUrl(baseUrl: String?)
-    **/
+     **/
 }
