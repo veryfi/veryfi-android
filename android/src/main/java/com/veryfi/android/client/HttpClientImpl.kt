@@ -93,7 +93,33 @@ class HttpClientImpl(private val httpClientData: HttpClientData) : HttpClient {
     }
 
     override fun updateDocument(documentId: String, parameters: JSONObject?): String {
-        TODO("Not yet implemented")
+        val requestArguments: JSONObject = if (parameters != null)
+            JSONObject(parameters.toString())
+        else
+            JSONObject()
+        requestArguments.put("id", documentId)
+        val httpConnection =
+            getHttpURLConnection(requestArguments, "documents/$documentId", "PUT")
+        httpConnection.doInput = true
+        httpConnection.doOutput = true
+
+        val os: OutputStream = httpConnection.outputStream
+        os.write(requestArguments.toString().toByteArray(Charsets.UTF_8))
+        os.close()
+
+        val br = BufferedReader(InputStreamReader(httpConnection.inputStream))
+        val sb = StringBuilder()
+        var line: String?
+        line = br.readLine()
+        while (line != null) {
+            sb.append("$line\n")
+            line = br.readLine()
+        }
+        br.close()
+        sb.toString()
+
+        httpConnection.connect()
+        return sb.toString()
     }
 
     override fun deleteDocument(documentId: String): String {

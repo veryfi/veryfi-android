@@ -80,10 +80,11 @@ class VeryfiAndroidOCRAPITest : KoinComponent {
     fun updateDocumentTest() {
         val documentId = "31727276" // Change to your document Id
         val parameters = JSONObject()
-        val notes = "Note updated"
+        val notes = "Note updated other"
+        parameters.put("notes", notes)
         val jsonResponseUpdated: String = client.updateDocument(documentId, parameters)
         val documentJson = JSONObject(jsonResponseUpdated)
-        assertEquals(documentJson.getString("notes"), notes)
+        assertEquals(notes, documentJson.getString("notes"))
     }
 
     @Test
