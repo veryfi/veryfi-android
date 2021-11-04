@@ -45,5 +45,7 @@ $dokka.location:com.veryfi.android.client/Constants.X_VERYFI_REQUEST_SIGNATURE//
 $dokka.location:com.veryfi.android.client/Constants.X_VERYFI_REQUEST_TIMESTAMP///PointingToDeclaration/android/com.veryfi.android.client/-constants/-x_-v-e-r-y-f-i_-r-e-q-u-e-s-t_-t-i-m-e-s-t-a-m-p/index.html
 $dokka.location:com.veryfi.android.client/Constants///PointingToDeclaration/android/com.veryfi.android.client/-constants/index.html
 $dokka.location:com.veryfi.android.client/Constants/value/#/PointingToDeclaration/android/com.veryfi.android.client/-constants/value.html
+$dokka.location:com.veryfi.android.client/VeryfiClientFactory///PointingToDeclaration/android/com.veryfi.android.client/-veryfi-client-factory/index.html
+$dokka.location:com.veryfi.android.client/VeryfiClientFactory/createClient/#kotlin.String#kotlin.String#kotlin.String#kotlin.String/PointingToDeclaration/android/com.veryfi.android.client/-veryfi-client-factory/create-client.html
 com.veryfi.android.client
 

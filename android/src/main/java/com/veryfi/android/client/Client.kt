@@ -5,19 +5,19 @@ import java.io.InputStream
 
 data class ClientData(
     /**
-     * clientId from hub
+     * clientId the [String] provided by Veryfi.
      */
     val clientId: String,
     /**
-     * clientSecret from hub
+     * clientSecret the [String] provided by Veryfi.
      */
     val clientSecret: String,
     /**
-     * username from hub
+     * username the [String] provided by Veryfi.
      */
     val username: String,
     /**
-     * apiKey from hub
+     * apiKey the [String] provided by Veryfi.
      */
     val apiKey: String
 )

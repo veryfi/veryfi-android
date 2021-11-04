@@ -30,9 +30,8 @@ class ClientTest : KoinComponent {
 
     init {
         val httpClientModule = module {
-            single { ClientData(clientId, clientSecret, username, apiKey) }
             single { ClientMock(InstrumentationRegistry.getInstrumentation().context) }
-            single { ClientImpl(get()) }
+            single { VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey) }
         }
         try {
             startKoin {
