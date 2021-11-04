@@ -2,10 +2,10 @@ package com.veryfi.android
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.veryfi.android.client.HttpClient
-import com.veryfi.android.client.HttpClientData
-import com.veryfi.android.client.HttpClientImpl
-import com.veryfi.android.client.HttpClientMock
+import com.veryfi.android.client.Client
+import com.veryfi.android.client.ClientData
+import com.veryfi.android.client.ClientImpl
+import com.veryfi.android.client.ClientMock
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.*
@@ -17,26 +17,26 @@ import org.koin.core.context.GlobalContext.startKoin
 import org.koin.dsl.module
 
 @RunWith(AndroidJUnit4::class)
-class VeryfiAndroidOCRAPITest : KoinComponent {
+class ClientTest : KoinComponent {
 
-    private val mockClient by inject<HttpClientMock>()
-    private val realClient by inject<HttpClientImpl>()
+    private val mockClient by inject<ClientMock>()
+    private val realClient by inject<ClientImpl>()
 
-    private val client: HttpClient
+    private val client: Client
 
-    private var clientId = "vrfdR0ALCMGfx32RO0gMFyfZeJT7UCliNxZZLnG"
-    private var clientSecret = "dNjx4jrzTxHjjn0cCLeApnz2ujHIsh3BtX6AHoRbhFLOOdctv785PItaORS1BowTeOzY67mlVj1KxR3k6h9gPvlExi4KLRAxFV8oHptHyJS7WY482Z0gYxZWvcxNMh1B"
-    private var username = "devapitest"
-    private var apiKey = "1171431d8e6eb8478a50d872bcb2dc51"
+    private var clientId = "your_client_id"
+    private var clientSecret = "your_client_secret"
+    private var username = "your_username"
+    private var apiKey = "your_password"
 
     private var mockResponses =
         false // Change to “false” if you want to test your personal credential
 
     init {
         val httpClientModule = module {
-            single { HttpClientData(clientId, clientSecret, username, apiKey) }
-            single { HttpClientMock(InstrumentationRegistry.getInstrumentation().context) }
-            single { HttpClientImpl(get()) }
+            single { ClientData(clientId, clientSecret, username, apiKey) }
+            single { ClientMock(InstrumentationRegistry.getInstrumentation().context) }
+            single { ClientImpl(get()) }
         }
         try {
             startKoin {
@@ -80,7 +80,7 @@ class VeryfiAndroidOCRAPITest : KoinComponent {
     fun updateDocumentTest() {
         val documentId = "31727276" // Change to your document Id
         val parameters = JSONObject()
-        val notes = "Note updated other"
+        val notes = "Note updated"
         parameters.put("notes", notes)
         val jsonResponseUpdated: String = client.updateDocument(documentId, parameters)
         val documentJson = JSONObject(jsonResponseUpdated)
@@ -108,7 +108,7 @@ class VeryfiAndroidOCRAPITest : KoinComponent {
         )
         val document = JSONObject(jsonResponse)
         assertEquals(
-            "Rumpke Waste & Recycling",
+            "Rumpke",
             document.getJSONObject("vendor").getString("name")
         )
     }

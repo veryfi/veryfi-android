@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'kotlin-android'
 }
 
@@ -41,7 +41,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     // Koin DI
-    implementation "io.insert-koin:koin-core:3.1.3"
-    testImplementation "io.insert-koin:koin-test:3.1.3"
+    androidTestImplementation "io.insert-koin:koin-core:3.1.3"
+    androidTestImplementation "io.insert-koin:koin-test:3.1.3"
 
 }
