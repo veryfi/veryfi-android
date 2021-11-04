@@ -1,7 +1,8 @@
-package com.veryfi.android.client
+package veryfi
 
 import android.content.Context
 import org.json.JSONObject
+import veryfi.Client
 import java.io.InputStream
 
 class ClientMock(private val context: Context) : Client {

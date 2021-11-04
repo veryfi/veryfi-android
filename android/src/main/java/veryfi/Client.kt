@@ -1,4 +1,4 @@
-package com.veryfi.android.client
+package veryfi
 
 import org.json.JSONObject
 import java.io.InputStream

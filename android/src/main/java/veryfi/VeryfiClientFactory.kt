@@ -1,4 +1,4 @@
-package com.veryfi.android.client
+package veryfi
 
 /**
  * Factory for creating instances of [Client].
