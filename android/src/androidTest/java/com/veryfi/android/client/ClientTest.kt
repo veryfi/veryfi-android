@@ -86,7 +86,7 @@ class ClientTest : KoinComponent {
     fun deleteDocumentTest(){
         val documentId = "36348006" // Change to your document Id
         val jsonResponse: String = client.deleteDocument(documentId)
-        assertEquals("200", jsonResponse)
+        assertFalse(jsonResponse.isEmpty())
     }
 
     @Test
