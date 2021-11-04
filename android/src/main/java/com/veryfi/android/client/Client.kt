@@ -4,9 +4,21 @@ import org.json.JSONObject
 import java.io.InputStream
 
 data class ClientData(
+    /**
+     * clientId from hub
+     */
     val clientId: String,
+    /**
+     * clientSecret from hub
+     */
     val clientSecret: String,
+    /**
+     * username from hub
+     */
     val username: String,
+    /**
+     * apiKey from hub
+     */
     val apiKey: String
 )
 
