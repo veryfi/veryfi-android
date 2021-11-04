@@ -1,0 +1,49 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:com.veryfi.android.client////PointingToDeclaration/android/com.veryfi.android.client/index.html
+$dokka.location:com.veryfi.android.client/Client///PointingToDeclaration/android/com.veryfi.android.client/-client/index.html
+$dokka.location:com.veryfi.android.client/Client/deleteDocument/#kotlin.String/PointingToDeclaration/android/com.veryfi.android.client/-client/delete-document.html
+$dokka.location:com.veryfi.android.client/Client/getDocument/#kotlin.String/PointingToDeclaration/android/com.veryfi.android.client/-client/get-document.html
+$dokka.location:com.veryfi.android.client/Client/getDocuments/#/PointingToDeclaration/android/com.veryfi.android.client/-client/get-documents.html
+$dokka.location:com.veryfi.android.client/Client/processDocument/#java.io.InputStream#kotlin.String#kotlin.collections.List[kotlin.String]#kotlin.Boolean#org.json.JSONObject?/PointingToDeclaration/android/com.veryfi.android.client/-client/process-document.html
+$dokka.location:com.veryfi.android.client/Client/processDocumentUrl/#kotlin.String#kotlin.collections.List[kotlin.String]?#kotlin.collections.List[kotlin.String]?#kotlin.Boolean#kotlin.Int#kotlin.Boolean#kotlin.String?#org.json.JSONObject?/PointingToDeclaration/android/com.veryfi.android.client/-client/process-document-url.html
+$dokka.location:com.veryfi.android.client/Client/updateDocument/#kotlin.String#org.json.JSONObject?/PointingToDeclaration/android/com.veryfi.android.client/-client/update-document.html
+$dokka.location:com.veryfi.android.client/ClientData///PointingToDeclaration/android/com.veryfi.android.client/-client-data/index.html
+$dokka.location:com.veryfi.android.client/ClientData/ClientData/#kotlin.String#kotlin.String#kotlin.String#kotlin.String/PointingToDeclaration/android/com.veryfi.android.client/-client-data/-client-data.html
+$dokka.location:com.veryfi.android.client/ClientData/apiKey/#/PointingToDeclaration/android/com.veryfi.android.client/-client-data/api-key.html
+$dokka.location:com.veryfi.android.client/ClientData/clientId/#/PointingToDeclaration/android/com.veryfi.android.client/-client-data/client-id.html
+$dokka.location:com.veryfi.android.client/ClientData/clientSecret/#/PointingToDeclaration/android/com.veryfi.android.client/-client-data/client-secret.html
+$dokka.location:com.veryfi.android.client/ClientData/username/#/PointingToDeclaration/android/com.veryfi.android.client/-client-data/username.html
+$dokka.location:com.veryfi.android.client/ClientImpl.Companion///PointingToDeclaration/android/com.veryfi.android.client/-client-impl/-companion/index.html
+$dokka.location:com.veryfi.android.client/ClientImpl.Companion/LIST_CATEGORIES/#/PointingToDeclaration/android/com.veryfi.android.client/-client-impl/-companion/-l-i-s-t_-c-a-t-e-g-o-r-i-e-s.html
+$dokka.location:com.veryfi.android.client/ClientImpl///PointingToDeclaration/android/com.veryfi.android.client/-client-impl/index.html
+$dokka.location:com.veryfi.android.client/ClientImpl/ClientImpl/#com.veryfi.android.client.ClientData/PointingToDeclaration/android/com.veryfi.android.client/-client-impl/-client-impl.html
+$dokka.location:com.veryfi.android.client/ClientImpl/deleteDocument/#kotlin.String/PointingToDeclaration/android/com.veryfi.android.client/-client-impl/delete-document.html
+$dokka.location:com.veryfi.android.client/ClientImpl/getDocument/#kotlin.String/PointingToDeclaration/android/com.veryfi.android.client/-client-impl/get-document.html
+$dokka.location:com.veryfi.android.client/ClientImpl/getDocuments/#/PointingToDeclaration/android/com.veryfi.android.client/-client-impl/get-documents.html
+$dokka.location:com.veryfi.android.client/ClientImpl/processDocument/#java.io.InputStream#kotlin.String#kotlin.collections.List[kotlin.String]#kotlin.Boolean#org.json.JSONObject?/PointingToDeclaration/android/com.veryfi.android.client/-client-impl/process-document.html
+$dokka.location:com.veryfi.android.client/ClientImpl/processDocumentUrl/#kotlin.String#kotlin.collections.List[kotlin.String]?#kotlin.collections.List[kotlin.String]?#kotlin.Boolean#kotlin.Int#kotlin.Boolean#kotlin.String?#org.json.JSONObject?/PointingToDeclaration/android/com.veryfi.android.client/-client-impl/process-document-url.html
+$dokka.location:com.veryfi.android.client/ClientImpl/updateDocument/#kotlin.String#org.json.JSONObject?/PointingToDeclaration/android/com.veryfi.android.client/-client-impl/update-document.html
+$dokka.location:com.veryfi.android.client/Constants.ACCEPT///PointingToDeclaration/android/com.veryfi.android.client/-constants/-a-c-c-e-p-t/index.html
+$dokka.location:com.veryfi.android.client/Constants.APPLICATION_JSON///PointingToDeclaration/android/com.veryfi.android.client/-constants/-a-p-p-l-i-c-a-t-i-o-n_-j-s-o-n/index.html
+$dokka.location:com.veryfi.android.client/Constants.AUTHORIZATION///PointingToDeclaration/android/com.veryfi.android.client/-constants/-a-u-t-h-o-r-i-z-a-t-i-o-n/index.html
+$dokka.location:com.veryfi.android.client/Constants.AUTO_DELETE///PointingToDeclaration/android/com.veryfi.android.client/-constants/-a-u-t-o_-d-e-l-e-t-e/index.html
+$dokka.location:com.veryfi.android.client/Constants.BOOST_MODE///PointingToDeclaration/android/com.veryfi.android.client/-constants/-b-o-o-s-t_-m-o-d-e/index.html
+$dokka.location:com.veryfi.android.client/Constants.CATEGORIES///PointingToDeclaration/android/com.veryfi.android.client/-constants/-c-a-t-e-g-o-r-i-e-s/index.html
+$dokka.location:com.veryfi.android.client/Constants.CLIENT_ID///PointingToDeclaration/android/com.veryfi.android.client/-constants/-c-l-i-e-n-t_-i-d/index.html
+$dokka.location:com.veryfi.android.client/Constants.CONTENT_TYPE///PointingToDeclaration/android/com.veryfi.android.client/-constants/-c-o-n-t-e-n-t_-t-y-p-e/index.html
+$dokka.location:com.veryfi.android.client/Constants.EXTERNAL_ID///PointingToDeclaration/android/com.veryfi.android.client/-constants/-e-x-t-e-r-n-a-l_-i-d/index.html
+$dokka.location:com.veryfi.android.client/Constants.FILE_DATA///PointingToDeclaration/android/com.veryfi.android.client/-constants/-f-i-l-e_-d-a-t-a/index.html
+$dokka.location:com.veryfi.android.client/Constants.FILE_NAME///PointingToDeclaration/android/com.veryfi.android.client/-constants/-f-i-l-e_-n-a-m-e/index.html
+$dokka.location:com.veryfi.android.client/Constants.FILE_URL///PointingToDeclaration/android/com.veryfi.android.client/-constants/-f-i-l-e_-u-r-l/index.html
+$dokka.location:com.veryfi.android.client/Constants.FILE_URLS///PointingToDeclaration/android/com.veryfi.android.client/-constants/-f-i-l-e_-u-r-l-s/index.html
+$dokka.location:com.veryfi.android.client/Constants.MAX_PAGES_TO_PROCESS///PointingToDeclaration/android/com.veryfi.android.client/-constants/-m-a-x_-p-a-g-e-s_-t-o_-p-r-o-c-e-s-s/index.html
+$dokka.location:com.veryfi.android.client/Constants.TIMESTAMP///PointingToDeclaration/android/com.veryfi.android.client/-constants/-t-i-m-e-s-t-a-m-p/index.html
+$dokka.location:com.veryfi.android.client/Constants.USER_AGENT///PointingToDeclaration/android/com.veryfi.android.client/-constants/-u-s-e-r_-a-g-e-n-t/index.html
+$dokka.location:com.veryfi.android.client/Constants.USER_AGENT_KOTLIN///PointingToDeclaration/android/com.veryfi.android.client/-constants/-u-s-e-r_-a-g-e-n-t_-k-o-t-l-i-n/index.html
+$dokka.location:com.veryfi.android.client/Constants.X_VERYFI_REQUEST_SIGNATURE///PointingToDeclaration/android/com.veryfi.android.client/-constants/-x_-v-e-r-y-f-i_-r-e-q-u-e-s-t_-s-i-g-n-a-t-u-r-e/index.html
+$dokka.location:com.veryfi.android.client/Constants.X_VERYFI_REQUEST_TIMESTAMP///PointingToDeclaration/android/com.veryfi.android.client/-constants/-x_-v-e-r-y-f-i_-r-e-q-u-e-s-t_-t-i-m-e-s-t-a-m-p/index.html
+$dokka.location:com.veryfi.android.client/Constants///PointingToDeclaration/android/com.veryfi.android.client/-constants/index.html
+$dokka.location:com.veryfi.android.client/Constants/value/#/PointingToDeclaration/android/com.veryfi.android.client/-constants/value.html
+com.veryfi.android.client
+
