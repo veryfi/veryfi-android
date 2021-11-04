@@ -13,7 +13,7 @@ enum class Constants(val value: String) {
     /**
      * header for HttpRequest
      */
-    USER_AGENT_JAVA("Java Veryfi-Java/1.0.5"),
+    USER_AGENT_KOTLIN("Kotlin Veryfi-Kotlin/1.0.0"),
 
     /**
      * header for HttpRequest
@@ -38,11 +38,6 @@ enum class Constants(val value: String) {
     /**
      * header for HttpRequest
      */
-    FORM_URL_ENCODED("application/x-www-form-urlencoded"),
-
-    /**
-     * header for HttpRequest
-     */
     X_VERYFI_REQUEST_TIMESTAMP("X-Veryfi-Request-Timestamp"),
 
     /**
@@ -54,11 +49,6 @@ enum class Constants(val value: String) {
      * header for HttpRequest
      */
     TIMESTAMP("timestamp"),
-
-    /**
-     * header for HttpRequest
-     */
-    SHA256("HmacSHA256"),
 
     /**
      * header for HttpRequest

@@ -4,7 +4,7 @@ import android.content.Context
 import org.json.JSONObject
 import java.io.InputStream
 
-class HttpClientMock(private val context: Context) : HttpClient {
+class ClientMock(private val context: Context) : Client {
 
     override fun getDocuments(): String {
         return gerFileAsStringByteArray("getDocuments.json")
