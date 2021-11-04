@@ -7,11 +7,11 @@ import java.io.InputStream
 class ClientMock(private val context: Context) : Client {
 
     override fun getDocuments(): String {
-        return gerFileAsStringByteArray("getDocuments.json")
+        return getFileAsStringByteArray("getDocuments.json")
     }
 
     override fun getDocument(documentId: String): String {
-        return gerFileAsStringByteArray("getDocument.json")
+        return getFileAsStringByteArray("getDocument.json")
     }
 
     override fun processDocument(
@@ -21,15 +21,15 @@ class ClientMock(private val context: Context) : Client {
         deleteAfterProcessing: Boolean,
         parameters: JSONObject?
     ): String {
-        return gerFileAsStringByteArray("processDocument.json")
+        return getFileAsStringByteArray("processDocument.json")
     }
 
     override fun updateDocument(documentId: String, parameters: JSONObject?): String {
-        return gerFileAsStringByteArray("updateDocument.json")
+        return getFileAsStringByteArray("updateDocument.json")
     }
 
     override fun deleteDocument(documentId: String): String {
-        return gerFileAsStringByteArray("deleteDocument.json")
+        return getFileAsStringByteArray("deleteDocument.json")
     }
 
     override fun processDocumentUrl(
@@ -42,10 +42,10 @@ class ClientMock(private val context: Context) : Client {
         externalId: String?,
         parameters: JSONObject?
     ): String {
-        return gerFileAsStringByteArray("processDocumentUrl.json")
+        return getFileAsStringByteArray("processDocumentUrl.json")
     }
 
-    private fun gerFileAsStringByteArray(fileName: String): String {
+    private fun getFileAsStringByteArray(fileName: String): String {
         val inputStream: InputStream = context.assets.open(fileName)
         val size: Int = inputStream.available()
         val buffer = ByteArray(size)

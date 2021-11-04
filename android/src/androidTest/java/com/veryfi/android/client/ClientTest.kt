@@ -1,11 +1,7 @@
-package com.veryfi.android
+package com.veryfi.android.client
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.veryfi.android.client.Client
-import com.veryfi.android.client.ClientData
-import com.veryfi.android.client.ClientImpl
-import com.veryfi.android.client.ClientMock
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.*
@@ -30,7 +26,7 @@ class ClientTest : KoinComponent {
     private var apiKey = "your_password"
 
     private var mockResponses =
-        false // Change to “false” if you want to test your personal credential
+        true // Change to “false” if you want to test your personal credential
 
     init {
         val httpClientModule = module {
