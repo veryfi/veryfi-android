@@ -8,14 +8,14 @@ import java.io.InputStream
 
 class ClientTest {
 
-    private val client: Client
-
     //credentials
     private var clientId = "your_client_id"
     private var clientSecret = "your_client_secret"
     private var username = "your_username"
     private var apiKey = "your_password"
 
+    //client implementations
+    private val client: Client
     private val realClient = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
     private val mockClient = ClientMock()
 
@@ -101,4 +101,5 @@ class ClientTest {
             document.getJSONObject("vendor").getString("name")
         )
     }
+
 }
