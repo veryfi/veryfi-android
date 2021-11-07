@@ -1,11 +1,9 @@
 package veryfi
 
-import android.content.Context
 import org.json.JSONObject
-import veryfi.Client
 import java.io.InputStream
 
-class ClientMock(private val context: Context) : Client {
+class ClientMock : Client {
 
     override fun getDocuments(): String {
         return getFileAsStringByteArray("getDocuments.json")
@@ -47,12 +45,16 @@ class ClientMock(private val context: Context) : Client {
     }
 
     private fun getFileAsStringByteArray(fileName: String): String {
-        val inputStream: InputStream = context.assets.open(fileName)
-        val size: Int = inputStream.available()
-        val buffer = ByteArray(size)
-        inputStream.read(buffer)
-        inputStream.close()
-        return String(buffer)
+        this::class.java.classLoader?.let {
+            val classLoader: ClassLoader = it
+            val inputStream: InputStream = classLoader.getResourceAsStream(fileName)
+            val size: Int = inputStream.available()
+            val buffer = ByteArray(size)
+            inputStream.read(buffer)
+            inputStream.close()
+            return String(buffer)
+        }
+        return ""
     }
 
 }

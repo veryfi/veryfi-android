@@ -1,18 +1,15 @@
 package veryfi
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.dsl.module
+import java.io.InputStream
 
-@RunWith(AndroidJUnit4::class)
 class ClientTest : KoinComponent {
 
     private val mockClient by inject<ClientMock>()
@@ -30,7 +27,7 @@ class ClientTest : KoinComponent {
 
     init {
         val httpClientModule = module {
-            single { ClientMock(InstrumentationRegistry.getInstrumentation().context) }
+            single { ClientMock() }
             single { VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey) }
         }
         try {
@@ -62,13 +59,23 @@ class ClientTest : KoinComponent {
 
     @Test
     fun processDocumentTest() {
-        val categories: List<String> = listOf("Advertising & Marketing", "Automotive")
-        val jsonResponse: String = client.processDocument(InstrumentationRegistry.getInstrumentation().context.assets.open("receipt.png"),"receipt.png", categories, false, null)
-        val document = JSONObject(jsonResponse)
-        assertEquals(
-            "The Home Depot",
-            document.getJSONObject("vendor").getString("name")
-        )
+        this::class.java.classLoader?.let {
+            val categories: List<String> = listOf("Advertising & Marketing", "Automotive")
+
+            val classLoader: ClassLoader = it
+            val inputStream: InputStream = classLoader.getResourceAsStream("receipt.png")
+
+            val jsonResponse: String = client.processDocument(inputStream,"receipt.png", categories, false, null)
+            val document = JSONObject(jsonResponse)
+            assertEquals(
+                "The Home Depot",
+                document.getJSONObject("vendor").getString("name")
+            )
+            inputStream.close()
+        }?: run{
+            throw java.lang.Exception("Can't get class loader")
+        }
+
     }
 
     @Test
