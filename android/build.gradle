@@ -50,7 +50,7 @@ android {
 
 tasks.koverHtmlReport {
     enabled = true
-    htmlReportDir.set(layout.buildDirectory.dir("my-reports/html-result"))
+    htmlReportDir.set(layout.buildDirectory.dir("coverage-reports/html-result"))
 }
 
 dokkaHtml.configure {
@@ -71,13 +71,10 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'androidx.test.ext:junit:1.1.3'
 
-    // Koin DI
-    testImplementation "io.insert-koin:koin-core:3.1.3"
-    testImplementation "io.insert-koin:koin-test:3.1.3"
-
+    //JSON
     testImplementation 'org.json:json:20180813'
 
-    //Kover
-    implementation "androidx.core:core-ktx:1.7.0"
+    //Kover for coverage
+    testImplementation "androidx.core:core-ktx:1.7.0"
 
 }

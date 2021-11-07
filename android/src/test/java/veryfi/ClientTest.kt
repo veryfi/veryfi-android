@@ -4,44 +4,31 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import org.koin.core.context.GlobalContext.startKoin
-import org.koin.dsl.module
 import java.io.InputStream
 
-class ClientTest : KoinComponent {
-
-    private val mockClient by inject<ClientMock>()
-    private val realClient by inject<ClientImpl>()
+class ClientTest {
 
     private val client: Client
 
+    //credentials
     private var clientId = "your_client_id"
     private var clientSecret = "your_client_secret"
     private var username = "your_username"
     private var apiKey = "your_password"
 
+    private val realClient = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
+    private val mockClient = ClientMock()
+
     private var mockResponses =
         true // Change to “false” if you want to test your personal credential
 
     init {
-        val httpClientModule = module {
-            single { ClientMock() }
-            single { VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey) }
-        }
-        try {
-            startKoin {
-                printLogger()
-                modules(httpClientModule)
-            }
-        } catch (e: Exception) {
-        }
         client = if (mockResponses) mockClient else realClient
     }
 
     @Test
     fun getDocumentsTest() {
+        VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
         val documents = JSONArray(client.getDocuments())
         assertTrue(documents.length() > 0)
     }
