@@ -14,7 +14,7 @@ class ClientTest {
     private var username = "your_username"
     private var apiKey = "your_password"
 
-    //client implementations
+    //client implementation
     private val client: Client
     private val realClient = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
     private val mockClient = ClientMock()

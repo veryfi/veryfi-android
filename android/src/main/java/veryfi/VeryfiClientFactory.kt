@@ -1,7 +1,5 @@
 package veryfi
 
-import veryfi.client.ClientImpl
-
 /**
  * Factory for creating instances of [Client].
  */
