@@ -26,7 +26,7 @@ jobs:
       - uses: eskatos/gradle-command-action@v1
         with:
             arguments: build
-            wrapper-cache-enabled: true
+            distributions-cache-enabled: true
             dependencies-cache-enabled: true
             configuration-cache-enabled: true
 
@@ -34,6 +34,6 @@ jobs:
       - uses: eskatos/gradle-command-action@v1
         with:
             arguments: testDebugUnitTest
-            wrapper-cache-enabled: true
+            distributions-cache-enabled: true
             dependencies-cache-enabled: true
             configuration-cache-enabled: true
