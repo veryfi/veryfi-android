@@ -3,25 +3,6 @@ package com.veryfi.android
 import org.json.JSONObject
 import java.io.InputStream
 
-data class ClientData(
-    /**
-     * clientId the [String] provided by Veryfi.
-     */
-    val clientId: String,
-    /**
-     * clientSecret the [String] provided by Veryfi.
-     */
-    val clientSecret: String,
-    /**
-     * username the [String] provided by Veryfi.
-     */
-    val username: String,
-    /**
-     * apiKey the [String] provided by Veryfi.
-     */
-    val apiKey: String
-)
-
 interface Client {
 
     /**
