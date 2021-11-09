@@ -12,15 +12,12 @@ Install from [Maven](https://mvnrepository.com/), a
 package manager for Java.
 
 
-Install the package from Maven:
-```bash
- <dependency>
-     <groupId>com.veryfi</groupId>
-     <artifactId>veryfi-java</artifactId>
-     <version>1.0.5</version>
- </dependency>
+Add in your project build.gradle file the veryfi android SDK dependency:
+```ruby
+dependencies {
+    implementation 'com.veryfi:android:1.0.0'
+}
 ```
-You may need to run the above commands with `sudo`.
 
 ## Getting Started
 
