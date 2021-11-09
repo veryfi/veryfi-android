@@ -1,5 +1,7 @@
-package veryfi
+package com.veryfi
 
+import com.veryfi.Client
+import com.veryfi.VeryfiClientFactory
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.*

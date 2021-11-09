@@ -1,4 +1,4 @@
-package veryfi
+package com.veryfi
 
 import org.json.JSONObject
 import java.io.InputStream

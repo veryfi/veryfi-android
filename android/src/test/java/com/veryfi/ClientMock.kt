@@ -1,5 +1,6 @@
-package veryfi
+package com.veryfi
 
+import com.veryfi.Client
 import org.json.JSONObject
 import java.io.InputStream
 

@@ -1,4 +1,4 @@
-package veryfi
+package com.veryfi
 
 enum class Constants(val value: String) {
     /**

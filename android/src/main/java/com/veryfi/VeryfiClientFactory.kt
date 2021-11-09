@@ -1,4 +1,4 @@
-package veryfi
+package com.veryfi
 
 /**
  * Factory for creating instances of [Client].
