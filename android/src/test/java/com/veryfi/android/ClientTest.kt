@@ -1,4 +1,4 @@
-package veryfi
+package com.veryfi.android
 
 import org.json.JSONArray
 import org.json.JSONObject
