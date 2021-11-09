@@ -1,4 +1,4 @@
-https://veryfi.github.io/veryfi-java/
+https://veryfi.github.io/veryfi-android/
 
 ![Veryfi Logo](https://cdn.veryfi.com/logos/veryfi-logo-wide-github.png)
 
