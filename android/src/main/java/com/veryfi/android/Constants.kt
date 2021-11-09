@@ -1,4 +1,4 @@
-package com.veryfi
+package com.veryfi.android
 
 enum class Constants(val value: String) {
     /**
