@@ -2,12 +2,9 @@ https://veryfi.github.io/veryfi-java/
 
 ![Veryfi Logo](https://cdn.veryfi.com/logos/veryfi-logo-wide-github.png)
 
-[![Java - version](https://img.shields.io/badge/OpenJDK-16-red)](https://openjdk.java.net/projects/jdk/16/)
-[![Coverage](.github/badges/jacoco.svg)](https://github.com/veryfi/veryfi-java/actions/workflows/maven.yml)
-[![Java CI with Maven](https://github.com/veryfi/veryfi-java/actions/workflows/maven.yml/badge.svg)](https://github.com/veryfi/veryfi-java/actions/workflows/maven.yml)
-[![Publish package to the Maven Central Repository and GitHub Packages](https://github.com/veryfi/veryfi-java/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/veryfi/veryfi-java/actions/workflows/maven-publish.yml)
+[![Android CI with Maven](https://github.com/veryfi/veryfi-android/actions/workflows/workflow.yml/badge.svg)](https://github.com/veryfi/veryfi-android/actions/workflows/workflow.yml)
 
-**veryfi** is a Java module for communicating with the [Veryfi OCR API](https://veryfi.com/api/)
+**veryfi** is a Android module for communicating with the [Veryfi OCR API](https://veryfi.com/api/)
 
 ## Installation
 
