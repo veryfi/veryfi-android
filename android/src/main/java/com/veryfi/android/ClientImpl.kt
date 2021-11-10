@@ -22,7 +22,7 @@ class ClientImpl(private val clientData: ClientData) : Client {
     override fun getDocuments(): String {
         val requestArguments = JSONObject()
         val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
-        httpConnection.connect()
+        httpConnection.connect() // mockee acá
         val br = BufferedReader(InputStreamReader(httpConnection.inputStream))
         val sb = StringBuilder()
         var line: String?
