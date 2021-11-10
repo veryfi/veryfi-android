@@ -27,30 +27,11 @@ If you don't have an account with Veryfi, please go ahead and register here: [ht
 ### Android API Client Library
 The **veryfi** library can be used to communicate with Veryfi API. All available functionality is described here https://veryfi.github.io/veryfi-android/android/com.veryfi.android/-client/index.html
 
-Http requests on Android must be performed on a thread different from the main UI thread to avoid android.os.NetworkOnMainThreadException, you can use your favorite way, for this documentation we're going to use a basic Android AsynkTask
+Http requests on Android must be performed on a thread different from the main UI thread to avoid android.os.NetworkOnMainThreadException, you can use your favorite way, for this documentation we're going to use Android ExecutorService and Handler classes
 
 Below is the sample kotlin script using **veryfi** to OCR and extract data from a document:
 
-Create a basic Activity
-```java
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-
-class MainActivity : AppCompatActivity() {
-    
-    var clientId = "your_client_id"
-    var clientSecret = "your_client_secret"
-    var username = "your_username"
-    var apiKey = "your_password"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-    }
-}
-```
-
-Create a basic layout TextView to set the response
+Create a basic layout with a TextView to set the response
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -72,23 +53,65 @@ Create a basic layout TextView to set the response
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
+Process a document
+```java
+class MainActivity : AppCompatActivity() {
+
+    var clientId = "your_client_id"
+    var clientSecret = "your_client_secret"
+    var username = "your_username"
+    var apiKey = "your_password"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        val executor: ExecutorService = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+
+        executor.execute {
+            //Background work here
+            val client = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
+            val categories = listOf("Advertising & Marketing", "Automotive")
+            val fileName = "example1.jpg"
+            val response =
+                client.processDocument(assets.open(fileName), fileName, categories, false, null)
+            handler.post {
+                //Update UI with response
+                findViewById<TextView>(R.id.response).text = response
+            }
+        }
+    }
+}
+```
+
 Update a document
 ```java
-import veryfi.*;
-import org.json.JSONObject;
+class MainActivity : AppCompatActivity() {
 
-public class Main {
-    public static void main(String[] args) {
-        String clientId = "your_client_id";
-        String clientSecret = "your_client_secret";
-        String username = "your_username";
-        String apiKey = "your_password";
-        Client client = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey);
-        String documentId = "your_document_id";
-        JSONObject parameters = new JSONObject();
-        parameters.put("category", "Meals & Entertainment");
-        parameters.put("total", 11.23);
-        String jsonResponse = client.updateDocument(documentId, parameters);
+    var clientId = "your_client_id"
+    var clientSecret = "your_client_secret"
+    var username = "your_username"
+    var apiKey = "your_password"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        val executor: ExecutorService = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+
+        executor.execute {
+            //Background work here
+            val client = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
+            val documentId = "your_document_id"
+            val parameters = JSONObject()
+            parameters.put("category", "Meals & Entertainment")
+            parameters.put("total", 11.23)
+            val response = client.updateDocument(documentId, parameters)
+            handler.post {
+                //Update UI with response
+                findViewById<TextView>(R.id.response).text = response
+            }
+        }
     }
 }
 ```
