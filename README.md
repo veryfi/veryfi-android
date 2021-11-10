@@ -24,28 +24,53 @@ dependencies {
 ### Obtaining Client ID and user keys
 If you don't have an account with Veryfi, please go ahead and register here: [https://hub.veryfi.com/signup/api/](https://hub.veryfi.com/signup/api/)
 
-### Java API Client Library
-The **veryfi** library can be used to communicate with Veryfi API. All available functionality is described here https://veryfi.github.io/veryfi-java/veryfi/Client.html
+### Android API Client Library
+The **veryfi** library can be used to communicate with Veryfi API. All available functionality is described here https://veryfi.github.io/veryfi-android/android/com.veryfi.android/-client/index.html
 
-Below is the sample script using **veryfi** to OCR and extract data from a document:
+Http requests on Android must be performed on a thread different from the main UI thread to avoid android.os.NetworkOnMainThreadException, you can use your favorite way, for this documentation we're going to use a basic Android AsynkTask
 
+Below is the sample kotlin script using **veryfi** to OCR and extract data from a document:
+
+Create a basic Activity
 ```java
-import veryfi.*;
-import java.util.Arrays;
-import java.util.List;
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
 
-public class Main {
-    public static void main(String[] args) {
-        String clientId = "your_client_id";
-        String clientSecret = "your_client_secret";
-        String username = "your_username";
-        String apiKey = "your_password";
-        Client client = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey);
-        List<String> categories = Arrays.asList("Advertising & Marketing", "Automotive");
-        String jsonResponse = client.processDocument("example1.jpg", categories, false, null);
+class MainActivity : AppCompatActivity() {
+    
+    var clientId = "your_client_id"
+    var clientSecret = "your_client_secret"
+    var username = "your_username"
+    var apiKey = "your_password"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
     }
 }
-``` 
+```
+
+Create a basic layout TextView to set the response
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/response"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
 
 Update a document
 ```java
@@ -79,7 +104,7 @@ To learn more about Veryfi visit https://www.veryfi.com/
 ## Tutorial
 
 
-Below is an introduction to the Java SDK.
+Below is an introduction to the Android SDK.
 
 
-[Link to blog post →](https://www.veryfi.com/java/)
+[Link to blog post →](https://www.veryfi.com/android/)
