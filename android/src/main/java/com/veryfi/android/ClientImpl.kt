@@ -6,14 +6,12 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.security.InvalidKeyException
-import java.security.NoSuchAlgorithmException
 import java.security.spec.MGF1ParameterSpec.SHA256
 import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-class ClientImpl(private val clientData: ClientData) : Client {
+open class ClientImpl(private val clientData: ClientData) : Client {
 
     private val baseUrl = "https://api.veryfi.com/api/"
     private val timeOut = 120000
@@ -22,17 +20,10 @@ class ClientImpl(private val clientData: ClientData) : Client {
     override fun getDocuments(): String {
         val requestArguments = JSONObject()
         val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
-        httpConnection.connect() // mockee acá
-        val br = BufferedReader(InputStreamReader(httpConnection.inputStream))
-        val sb = StringBuilder()
-        var line: String?
-        line = br.readLine()
-        while (line != null) {
-            sb.append("$line\n")
-            line = br.readLine()
-        }
-        br.close()
-        return sb.toString()
+        val bufferedReader = connect(httpConnection)
+        val stringResponse = processBufferedReader(bufferedReader)
+        httpConnection.disconnect()
+        return stringResponse
     }
 
     override fun getDocument(documentId: String): String {
@@ -40,17 +31,10 @@ class ClientImpl(private val clientData: ClientData) : Client {
         requestArguments.put("id", documentId)
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents/$documentId", "GET")
-        httpConnection.connect()
-        val br = BufferedReader(InputStreamReader(httpConnection.inputStream))
-        val sb = StringBuilder()
-        var line: String?
-        line = br.readLine()
-        while (line != null) {
-            sb.append("$line\n")
-            line = br.readLine()
-        }
-        br.close()
-        return sb.toString()
+        val bufferedReader = connect(httpConnection)
+        val stringResponse = processBufferedReader(bufferedReader)
+        httpConnection.disconnect()
+        return stringResponse
     }
 
     override fun processDocument(
@@ -70,56 +54,26 @@ class ClientImpl(private val clientData: ClientData) : Client {
             )
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents", "POST")
-        httpConnection.doInput = true
-        httpConnection.doOutput = true
-
-        val os: OutputStream = httpConnection.outputStream
-        os.write(requestArguments.toString().toByteArray(Charsets.UTF_8))
-        os.close()
-
-        val br = BufferedReader(InputStreamReader(httpConnection.inputStream))
-        val sb = StringBuilder()
-        var line: String?
-        line = br.readLine()
-        while (line != null) {
-            sb.append("$line\n")
-            line = br.readLine()
-        }
-        br.close()
-        sb.toString()
-
-        httpConnection.connect()
-        return sb.toString()
+        writeOutputStream(httpConnection, requestArguments)
+        val bufferedReader = connect(httpConnection)
+        val stringResponse = processBufferedReader(bufferedReader)
+        httpConnection.disconnect()
+        return stringResponse
     }
 
     override fun updateDocument(documentId: String, parameters: JSONObject?): String {
         val requestArguments: JSONObject = if (parameters != null)
             JSONObject(parameters.toString())
         else
-            JSONObject()
+            return "{status:Nothing to update}"
         requestArguments.put("id", documentId)
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents/$documentId", "PUT")
-        httpConnection.doInput = true
-        httpConnection.doOutput = true
-
-        val os: OutputStream = httpConnection.outputStream
-        os.write(requestArguments.toString().toByteArray(Charsets.UTF_8))
-        os.close()
-
-        val br = BufferedReader(InputStreamReader(httpConnection.inputStream))
-        val sb = StringBuilder()
-        var line: String?
-        line = br.readLine()
-        while (line != null) {
-            sb.append("$line\n")
-            line = br.readLine()
-        }
-        br.close()
-        sb.toString()
-
-        httpConnection.connect()
-        return sb.toString()
+        writeOutputStream(httpConnection, requestArguments)
+        val bufferedReader = connect(httpConnection)
+        val stringResponse = processBufferedReader(bufferedReader)
+        httpConnection.disconnect()
+        return stringResponse
     }
 
     override fun deleteDocument(documentId: String): String {
@@ -127,8 +81,10 @@ class ClientImpl(private val clientData: ClientData) : Client {
         requestArguments.put("id", documentId)
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents/$documentId", "DELETE")
-        httpConnection.connect()
-        return "${httpConnection.responseCode}"
+        val bufferedReader = connect(httpConnection)
+        val stringResponse = processBufferedReader(bufferedReader)
+        httpConnection.disconnect()
+        return stringResponse
     }
 
     override fun processDocumentUrl(
@@ -153,26 +109,61 @@ class ClientImpl(private val clientData: ClientData) : Client {
         )
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents", "POST")
+        writeOutputStream(httpConnection, requestArguments)
+        val bufferedReader = connect(httpConnection)
+        val stringResponse = processBufferedReader(bufferedReader)
+        httpConnection.disconnect()
+        return stringResponse
+    }
+
+    override fun connect(
+        httpConnection: HttpURLConnection
+    ): BufferedReader {
+        if (httpConnection.requestMethod == "GET" || httpConnection.requestMethod == "DELETE") {
+            httpConnection.connect()
+        }
+        val inputStream: InputStream = try {
+            httpConnection.inputStream
+        } catch (e: IOException) {
+            print(e.message)
+            "{status:fail, code:${httpConnection.responseCode}}".byteInputStream()
+        }
+        return BufferedReader(InputStreamReader(inputStream))
+    }
+
+    /**
+     * Write outputStream by POST or PUT request.
+     * @param httpConnection [HttpURLConnection] httpURLConnection to process
+     * @param requestArguments [JSONObject] requestArgument to send.
+     */
+    private fun writeOutputStream(
+        httpConnection: HttpURLConnection,
+        requestArguments: JSONObject
+    ) {
         httpConnection.doInput = true
         httpConnection.doOutput = true
+        val outputStream: OutputStream = httpConnection.outputStream
+        outputStream.write(requestArguments.toString().toByteArray(Charsets.UTF_8))
+        outputStream.close()
+        return
+    }
 
-        val os: OutputStream = httpConnection.outputStream
-        os.write(requestArguments.toString().toByteArray(Charsets.UTF_8))
-        os.close()
-
-        val br = BufferedReader(InputStreamReader(httpConnection.inputStream))
-        val sb = StringBuilder()
+    /**
+     * process the buffer to convert it to a string
+     * @param bufferedReader [BufferedReader] gotten by connection.
+     * @return [String] String in JSON format with the response.
+     */
+    private fun processBufferedReader(bufferedReader: BufferedReader): String {
+        val stringBuilder = StringBuilder()
         var line: String?
-        line = br.readLine()
+        line = bufferedReader.readLine()
         while (line != null) {
-            sb.append("$line\n")
-            line = br.readLine()
+            stringBuilder.append("$line\n")
+            line = bufferedReader.readLine()
         }
-        br.close()
-        sb.toString()
-
-        httpConnection.connect()
-        return sb.toString()
+        bufferedReader.close()
+        stringBuilder.toString()
+        return stringBuilder.toString()
     }
 
     /**
@@ -222,18 +213,10 @@ class ClientImpl(private val clientData: ClientData) : Client {
         val secretBytes = clientData.clientSecret.toByteArray(StandardCharsets.UTF_8)
         val payloadBytes = payload.toByteArray(StandardCharsets.UTF_8)
         val keySpec = SecretKeySpec(secretBytes, SHA256.toString())
-        val mac = try {
-            Mac.getInstance(SHA256.toString())
-        } catch (e: NoSuchAlgorithmException) {
-            return e.message
-        }
-        try {
-            mac.init(keySpec)
-        } catch (e: InvalidKeyException) {
-            return e.message
-        }
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(keySpec)
         val macBytes: ByteArray = mac.doFinal(payloadBytes)
-        return String(Base64.encode(macBytes, Base64.DEFAULT))
+        return Base64.encodeToString(macBytes, Base64.DEFAULT)
     }
 
     private fun getApiKey(): String {
@@ -253,20 +236,17 @@ class ClientImpl(private val clientData: ClientData) : Client {
         fileStream: InputStream, fileName: String, categoriesIn: List<String?>?,
         deleteAfterProcessing: Boolean, parameters: JSONObject?
     ): JSONObject {
-        var categories = categoriesIn
-        if (categories == null || categories.isEmpty()) {
-            categories = LIST_CATEGORIES
-        }
+        val categories = if (categoriesIn == null || categoriesIn.isEmpty())
+            LIST_CATEGORIES else categoriesIn
         var base64EncodedString = ""
+        // TODO I CANNOT UNDERSTAND IN WHAT CASE THIS IS GOING TO FAIL? IT IS GOING TO FAIL IF NO FILE STREAM, SO WE SHOULD BE CONTROL FILESTREAM LEN NO TRY CATCH THIS IS A MACHETAZO
         try {
-            base64EncodedString = String(Base64.encode(fileStream.readBytes(), Base64.DEFAULT))
+            base64EncodedString = Base64.encodeToString(fileStream.readBytes(), Base64.DEFAULT)
         } catch (e: IOException) {
             e.printStackTrace()
         }
         val requestArguments: JSONObject = if (parameters != null)
-            JSONObject(parameters.toString())
-        else
-            JSONObject()
+            JSONObject(parameters.toString()) else JSONObject()
         requestArguments.put(Constants.FILE_NAME.value, fileName)
         requestArguments.put(Constants.FILE_DATA.value, base64EncodedString)
         requestArguments.put(Constants.CATEGORIES.value, categories)
@@ -295,10 +275,8 @@ class ClientImpl(private val clientData: ClientData) : Client {
         if (categories == null || categories.isEmpty()) {
             categories = LIST_CATEGORIES
         }
-        val requestArguments: JSONObject = if (parameters != null)
-            JSONObject(parameters.toString())
-        else
-            JSONObject()
+        val requestArguments = if (parameters != null)
+            JSONObject(parameters.toString()) else JSONObject()
         requestArguments.put(Constants.AUTO_DELETE.value, deleteAfterProcessing)
         requestArguments.put(Constants.BOOST_MODE.value, boostMode)
         requestArguments.put(Constants.CATEGORIES.value, categories)

@@ -1,7 +1,9 @@
 package com.veryfi.android
 
 import org.json.JSONObject
+import java.io.BufferedReader
 import java.io.InputStream
+import java.net.HttpURLConnection
 
 interface Client {
 
@@ -72,4 +74,14 @@ interface Client {
         externalId: String?,
         parameters: JSONObject?
     ): String
+
+    /**
+     * connect to URL
+     * @param httpConnection HttpURLConnection object
+     * @return A buffer with the response
+     */
+    fun connect(
+        httpConnection: HttpURLConnection
+    ): BufferedReader
+
 }
