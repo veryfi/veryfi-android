@@ -1,6 +1,5 @@
 package com.veryfi.android
 
-import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -13,8 +12,6 @@ import java.io.InputStream
 import java.io.InputStreamReader
 
 
-// TODO API v8 DON'T WORK!
-// TODO API version should be a parameter of our client constructor
 class ClientTest {
 
     //credentials
@@ -36,9 +33,9 @@ class ClientTest {
             val bufferedReader = getFileAsBufferedReader("getDocuments.json")
             doReturn(bufferedReader).`when`(client).connect(anyOrNull())
         }
-        val jsonResponse = JSONArray(client.getDocuments())
-        assertEquals(JSONArray::class.java, jsonResponse::class.java)
-        assertTrue(jsonResponse.length() > 0)
+        val jsonResponse = JSONObject(client.getDocuments())
+        print(jsonResponse)
+        assertEquals(2, jsonResponse.length())
     }
 
     @Test
@@ -50,13 +47,13 @@ class ClientTest {
             val bufferedReader = getFileAsBufferedReader("getDocument.json")
             doReturn(bufferedReader).`when`(client).connect(anyOrNull())
         } else {
-            val documents = JSONArray(client.getDocuments())
+            val documents = JSONObject(client.getDocuments())
             if (documents.length() < 1) {
                 print ("NO DOCUMENTS IN YOUR ACCOUNT")
                 assertTrue(false)
                 return
             }
-            documentId = documents.getJSONObject(0).getInt("id")
+            documentId = documents.getJSONArray("documents").getJSONObject(0).getInt("id")
         }
         val jsonResponse = JSONObject(client.getDocument(documentId.toString()))
         assertEquals(documentId, jsonResponse.getInt("id"))
@@ -95,8 +92,8 @@ class ClientTest {
         } else {
             notes = generateRandomString()
             parameters.put("notes", notes)
-            val documents = JSONArray(client.getDocuments())
-            documentId = documents.getJSONObject(0).getInt("id")
+            val documents = JSONObject(client.getDocuments())
+            documentId = documents.getJSONArray("documents").getJSONObject(0).getInt("id")
         }
         val jsonResponse = JSONObject(client.updateDocument(documentId.toString(), parameters))
         assertEquals(notes, jsonResponse.getString("notes"))
