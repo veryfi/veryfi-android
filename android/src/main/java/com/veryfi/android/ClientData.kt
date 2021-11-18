@@ -16,5 +16,9 @@ data class ClientData(
     /**
      * apiKey the [String] provided by Veryfi.
      */
-    val apiKey: String
+    val apiKey: String,
+    /**
+     * apiVersion [Int] value of current api version by default 8.
+     */
+    val apiVersion: Int
 )

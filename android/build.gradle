@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'org.jetbrains.dokka'
+    id 'kover'
 }
 
 android {
@@ -34,6 +35,28 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+
+    testOptions {
+        unitTests.all {
+            if (name == "testDebugUnitTest") {
+                kover {
+                    enabled = true
+                    binaryReportFile.set(file("$buildDir/custom/debug-report.bin"))
+                    includes = ['veryfi\\..*']
+                }
+            }
+        }
+    }
+}
+
+tasks.koverHtmlReport {
+    enabled = true                          // false to disable report generation
+    htmlReportDir.set(layout.buildDirectory.dir("my-reports/html-result"))
+}
+
+tasks.koverXmlReport {
+    enabled = true
+    xmlReportFile.set(layout.buildDirectory.file("my-reports/result.xml"))
 }
 
 dokkaHtml.configure {
@@ -52,7 +75,10 @@ dependencies {
     //Unit Tests
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'androidx.test.ext:junit:1.1.3'
-
-    //JSON
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation 'org.json:json:20180813'
+
+    //Kover
+    implementation "androidx.core:core-ktx:1.7.0"
+
 }
