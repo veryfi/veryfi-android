@@ -15,7 +15,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
 
     private val baseUrl = "https://api.veryfi.com/api/"
     private val timeOut = 120000
-    private val apiVersion = 7
+    private val apiVersion = clientData.apiVersion
 
     override fun getDocuments(): String {
         val requestArguments = JSONObject()
@@ -44,6 +44,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         deleteAfterProcessing: Boolean,
         parameters: JSONObject?
     ): String {
+        if (fileStream.available() == 0) return "{status:file stream doesn't exists}"
         val requestArguments =
             getProcessDocumentArguments(
                 fileStream,
@@ -62,11 +63,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     }
 
     override fun updateDocument(documentId: String, parameters: JSONObject?): String {
-        val requestArguments: JSONObject = if (parameters != null)
+        val requestArguments: JSONObject = if (parameters != null && parameters.length() > 0)
             JSONObject(parameters.toString())
         else
             return "{status:Nothing to update}"
-        requestArguments.put("id", documentId)
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents/$documentId", "PUT")
         writeOutputStream(httpConnection, requestArguments)
@@ -182,23 +182,24 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         val timeStamp: Long = date.time
         val partnerURL = "${baseUrl}v${apiVersion}/partner"
         val url = URL("$partnerURL/$endPoint/")
-        val httpConn = url.openConnection() as HttpURLConnection
-        httpConn.requestMethod = httpVerb
-        httpConn.connectTimeout = timeOut
-        httpConn.setRequestProperty(Constants.USER_AGENT.value, Constants.USER_AGENT_KOTLIN.value)
-        httpConn.setRequestProperty(Constants.ACCEPT.value, Constants.APPLICATION_JSON.value)
-        httpConn.setRequestProperty(Constants.CONTENT_TYPE.value, Constants.APPLICATION_JSON.value)
-        httpConn.setRequestProperty(Constants.CLIENT_ID.value, clientData.clientId)
-        httpConn.setRequestProperty(Constants.AUTHORIZATION.value, getApiKey())
-        httpConn.setRequestProperty(
+        val httpConnection = url.openConnection() as HttpURLConnection
+        httpConnection.requestMethod = httpVerb
+        httpConnection.connectTimeout = timeOut
+        httpConnection.setRequestProperty(Constants.USER_AGENT.value, Constants.USER_AGENT_KOTLIN.value)
+        httpConnection.setRequestProperty(Constants.ACCEPT.value, Constants.APPLICATION_JSON.value)
+        httpConnection.setRequestProperty(Constants.CONTENT_TYPE.value, Constants.APPLICATION_JSON.value)
+        httpConnection.setRequestProperty(Constants.CLIENT_ID.value, clientData.clientId)
+        httpConnection.setRequestProperty(Constants.AUTHORIZATION.value, getApiKey())
+        httpConnection.setRequestProperty(
             Constants.X_VERYFI_REQUEST_TIMESTAMP.value,
             timeStamp.toString()
         )
-        httpConn.setRequestProperty(
+        val signature = generateSignature(timeStamp, requestArguments)
+        httpConnection.setRequestProperty(
             Constants.X_VERYFI_REQUEST_SIGNATURE.value,
-            generateSignature(timeStamp, requestArguments)
+            signature
         )
-        return httpConn
+        return httpConnection
     }
 
     /**
@@ -208,8 +209,9 @@ open class ClientImpl(private val clientData: ClientData) : Client {
      * @return Unique signature generated using the client_secret and the payload
      */
     private fun generateSignature(timeStamp: Long, payloadParams: JSONObject): String? {
-        payloadParams.put(Constants.TIMESTAMP.value, timeStamp.toString())
-        val payload = payloadParams.toString()
+        val jsonPayload = JSONObject(payloadParams.toString())
+        jsonPayload.put(Constants.TIMESTAMP.value, timeStamp.toString())
+        val payload = jsonPayload.toString()
         val secretBytes = clientData.clientSecret.toByteArray(StandardCharsets.UTF_8)
         val payloadBytes = payload.toByteArray(StandardCharsets.UTF_8)
         val keySpec = SecretKeySpec(secretBytes, SHA256.toString())
@@ -238,13 +240,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     ): JSONObject {
         val categories = if (categoriesIn == null || categoriesIn.isEmpty())
             LIST_CATEGORIES else categoriesIn
-        var base64EncodedString = ""
-        // TODO I CANNOT UNDERSTAND IN WHAT CASE THIS IS GOING TO FAIL? IT IS GOING TO FAIL IF NO FILE STREAM, SO WE SHOULD BE CONTROL FILESTREAM LEN NO TRY CATCH THIS IS A MACHETAZO
-        try {
-            base64EncodedString = Base64.encodeToString(fileStream.readBytes(), Base64.DEFAULT)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
+        val base64EncodedString = Base64.encodeToString(fileStream.readBytes(), Base64.DEFAULT)
         val requestArguments: JSONObject = if (parameters != null)
             JSONObject(parameters.toString()) else JSONObject()
         requestArguments.put(Constants.FILE_NAME.value, fileName)
