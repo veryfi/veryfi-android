@@ -2,7 +2,8 @@ https://veryfi.github.io/veryfi-android/
 
 ![Veryfi Logo](https://cdn.veryfi.com/logos/veryfi-logo-wide-github.png)
 
-[![Android CI with Maven](https://github.com/veryfi/veryfi-android/actions/workflows/workflow.yml/badge.svg)](https://github.com/veryfi/veryfi-android/actions/workflows/workflow.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![code coverage](./metrics/code_coverage.svg)](./metrics/code_coverage.svg)
 
 **veryfi** is a Android module for communicating with the [Veryfi OCR API](https://veryfi.com/api/)
 
