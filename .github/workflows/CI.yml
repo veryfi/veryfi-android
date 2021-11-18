@@ -1,0 +1,40 @@
+name: CI
+
+on:
+
+  push:
+    branches:
+      - main
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Install java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Generate XML test report
+        run: ./gradlew koverXmlReport
+
+      - name: Check test and generate badge
+        run: cd metrics && python ./generate_badges.py && cd..
+
+      - name: Commit Code Coverage Image to Repository
+        uses: EndBug/add-and-commit@v5
+        with:
+          author_name: Github actions
+          author_email: veryfi@veryfi.com
+          message: "Update report"
+          add: "./metrics"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
