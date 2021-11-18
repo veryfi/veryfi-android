@@ -164,7 +164,7 @@ class ClientTest {
         )
         val getDocumentsResponse = client.getDocuments()
         val jsonResponse = JSONObject(getDocumentsResponse)
-        assertEquals("fail", jsonResponse.getString("status")) // TODO we need return status fails and the fail code.
+        assertEquals("fail", jsonResponse.getString("status"))
     }
 
     private fun getFileAsBufferedReader(fileName: String): BufferedReader? {
