@@ -27,4 +27,4 @@ jobs:
         run: ./gradlew koverXmlReport
 
       - name: Check test and generate badge
-        run: cd metrics && python ./generate_badges.py && cd..
+        run: cd metrics && python ./generate_badges.py && cd ..
