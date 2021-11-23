@@ -35,8 +35,8 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
-
     testOptions {
+        unitTests.returnDefaultValues = true
         unitTests.all {
             if (name == "testDebugUnitTest") {
                 kover {
