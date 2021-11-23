@@ -1,10 +1,14 @@
 package com.veryfi.android
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
-import com.veryfi.android.async.VeryfiClientObserver
+import android.util.Log
+import androidx.annotation.MainThread
 import io.reactivex.Observable.just
 import org.json.JSONObject
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.io.*
 import java.net.HttpURLConnection
@@ -20,16 +24,36 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     private val baseUrl = "https://api.veryfi.com/api/"
     private val timeOut = 120000
     private val apiVersion = clientData.apiVersion
+    private val disposables: CompositeDisposable = CompositeDisposable()
 
-    override fun getDocuments(onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+    override fun getDocuments(@MainThread onSuccess: (String) -> Unit, onError: (String) -> Unit) {
         val requestArguments = JSONObject()
         val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
+        asyncConnection(httpConnection, onSuccess, onError)
+    }
+
+    private fun asyncConnection(
+        httpConnection: HttpURLConnection,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
         just(httpConnection)
+            .doOnNext { httpURLConnection ->
+                val jsonResponse = processBufferedReader(connect(httpURLConnection))
+                val mainHandler = Handler(Looper.getMainLooper())
+                mainHandler.post {
+                    onSuccess(jsonResponse)
+                }
+            }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                VeryfiClientObserver(onSuccess, onError, ::connect, ::processBufferedReader)
-            )
+            .subscribe({ data ->
+                Log.d(TAG, "Consuming item " + data.url)
+            }, { error ->
+                onError("Veryfi client Error: " + error.localizedMessage)
+            }).let {
+                disposables.add(it)
+            }
     }
 
     override fun getDocument(documentId: String): String {
@@ -315,6 +339,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
             "Job Supplies",
             "Grocery"
         )
+        const val TAG = "VeryfiClient"
     }
 
 }
