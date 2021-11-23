@@ -28,8 +28,6 @@ If you don't have an account with Veryfi, please go ahead and register here: [ht
 ### Android API Client Library
 The **veryfi** library can be used to communicate with Veryfi API. All available functionality is described here https://veryfi.github.io/veryfi-android/android/com.veryfi.android/-client/index.html
 
-Http requests on Android must be performed on a thread different from the main UI thread to avoid android.os.NetworkOnMainThreadException, you can use your favorite way, for this documentation we're going to use Android ExecutorService and Handler classes
-
 Below is the sample kotlin script using **veryfi** to OCR and extract data from a document:
 
 Create a basic layout with a TextView to set the response
@@ -66,21 +64,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val executor: ExecutorService = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
-
-        executor.execute {
-            //Background work here
-            val client = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
-            val categories = listOf("Advertising & Marketing", "Automotive")
-            val fileName = "example1.jpg"
-            val response =
-                client.processDocument(assets.open(fileName), fileName, categories, false, null)
-            handler.post {
-                //Update UI with response
-                findViewById<TextView>(R.id.response).text = response
-            }
-        }
+        val client = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
+        val categories = listOf("Advertising & Marketing", "Automotive")
+        val fileName = "example1.jpg"
+        client.processDocument(assets.open(fileName), fileName, categories, false, null, { jsonString ->
+            //Update UI with jsonString response
+            findViewById<TextView>(R.id.response).text = jsonString
+        }, { errorMessage ->
+            //handle errorMessage
+        })
     }
 }
 ```
@@ -97,26 +89,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val executor: ExecutorService = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
-
-        executor.execute {
-            //Background work here
-            val client = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
-            val documentId = "your_document_id"
-            val parameters = JSONObject()
-            parameters.put("category", "Meals & Entertainment")
-            parameters.put("total", 11.23)
-            val response = client.updateDocument(documentId, parameters)
-            handler.post {
-                //Update UI with response
-                findViewById<TextView>(R.id.response).text = response
-            }
-        }
+        setContentView(R.layout.activity_main)
+        val documentId = "your_document_id"
+        val parameters = JSONObject()
+        parameters.put("category", "Meals & Entertainment")
+        parameters.put("total", 11.23)
+        client.updateDocument(documentId, parameters, { jsonString ->
+            //Update UI with jsonString response
+            findViewById<TextView>(R.id.response).text = jsonString
+        }, { errorMessage ->
+            //handle errorMessage
+        })
     }
 }
 ```
-
 
 ## Need help?
 If you run into any issue or need help installing or using the library, please contact support@veryfi.com.
@@ -126,9 +112,6 @@ If you found a bug in this library or would like new features added, then open a
 To learn more about Veryfi visit https://www.veryfi.com/
 
 ## Tutorial
-
-
 Below is an introduction to the Android SDK.
-
 
 [Link to blog post →](https://www.veryfi.com/android/)
