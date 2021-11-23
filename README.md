@@ -44,6 +44,7 @@ Create a basic layout with a TextView to set the response
         android:id="@+id/response"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="#535353"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
