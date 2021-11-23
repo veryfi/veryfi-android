@@ -3,6 +3,7 @@ package com.veryfi.android
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
+import java.lang.Exception
 import java.net.HttpURLConnection
 
 interface Client {
@@ -11,7 +12,7 @@ interface Client {
      * Returns a json string [String] list of documents.
      * @return the list of previously processed documents [String]
      */
-    fun getDocuments(): String
+    fun getDocuments(onSuccess: (String) -> Unit, onError: (String) -> Unit)
 
     /**
      * Returns a json string [String] document information

@@ -1,7 +1,11 @@
 package com.veryfi.android
 
 import android.util.Base64
+import com.veryfi.android.async.VeryfiClientObserver
+import io.reactivex.Observable.just
 import org.json.JSONObject
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -17,13 +21,15 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     private val timeOut = 120000
     private val apiVersion = clientData.apiVersion
 
-    override fun getDocuments(): String {
+    override fun getDocuments(onSuccess: (String) -> Unit, onError: (String) -> Unit) {
         val requestArguments = JSONObject()
         val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        just(httpConnection)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                VeryfiClientObserver(onSuccess, onError, ::connect, ::processBufferedReader)
+            )
     }
 
     override fun getDocument(documentId: String): String {
@@ -185,9 +191,15 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         val httpConnection = url.openConnection() as HttpURLConnection
         httpConnection.requestMethod = httpVerb
         httpConnection.connectTimeout = timeOut
-        httpConnection.setRequestProperty(Constants.USER_AGENT.value, Constants.USER_AGENT_KOTLIN.value)
+        httpConnection.setRequestProperty(
+            Constants.USER_AGENT.value,
+            Constants.USER_AGENT_KOTLIN.value
+        )
         httpConnection.setRequestProperty(Constants.ACCEPT.value, Constants.APPLICATION_JSON.value)
-        httpConnection.setRequestProperty(Constants.CONTENT_TYPE.value, Constants.APPLICATION_JSON.value)
+        httpConnection.setRequestProperty(
+            Constants.CONTENT_TYPE.value,
+            Constants.APPLICATION_JSON.value
+        )
         httpConnection.setRequestProperty(Constants.CLIENT_ID.value, clientData.clientId)
         httpConnection.setRequestProperty(Constants.AUTHORIZATION.value, getApiKey())
         httpConnection.setRequestProperty(
