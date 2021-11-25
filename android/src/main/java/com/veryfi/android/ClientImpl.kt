@@ -1,7 +1,15 @@
 package com.veryfi.android
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
+import android.util.Log
+import androidx.annotation.MainThread
+import io.reactivex.Observable.just
 import org.json.JSONObject
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -16,25 +24,26 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     private val baseUrl = "https://api.veryfi.com/api/"
     private val timeOut = 120000
     private val apiVersion = clientData.apiVersion
+    private val disposables: CompositeDisposable = CompositeDisposable()
 
-    override fun getDocuments(): String {
+    override fun getDocuments(
+        @MainThread onSuccess: (String) -> Unit,
+        @MainThread onError: (String) -> Unit
+    ) {
         val requestArguments = JSONObject()
         val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
-    override fun getDocument(documentId: String): String {
+    override fun getDocument(
+        documentId: String,
+        @MainThread onSuccess: (String) -> Unit,
+        @MainThread onError: (String) -> Unit
+    ) {
         val requestArguments = JSONObject()
         requestArguments.put("id", documentId)
-        val httpConnection =
-            getHttpURLConnection(requestArguments, "documents/$documentId", "GET")
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        val httpConnection = getHttpURLConnection(requestArguments, "documents/$documentId", "GET")
+        asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
     override fun processDocument(
@@ -42,9 +51,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         fileName: String,
         categories: List<String>,
         deleteAfterProcessing: Boolean,
-        parameters: JSONObject?
-    ): String {
-        if (fileStream.available() == 0) return "{status:file stream doesn't exists}"
+        parameters: JSONObject?,
+        @MainThread onSuccess: (String) -> Unit,
+        @MainThread onError: (String) -> Unit
+    ) {
         val requestArguments =
             getProcessDocumentArguments(
                 fileStream,
@@ -55,36 +65,33 @@ open class ClientImpl(private val clientData: ClientData) : Client {
             )
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents", "POST")
-        writeOutputStream(httpConnection, requestArguments)
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
-    override fun updateDocument(documentId: String, parameters: JSONObject?): String {
-        val requestArguments: JSONObject = if (parameters != null && parameters.length() > 0)
+    override fun updateDocument(
+        documentId: String,
+        parameters: JSONObject,
+        @MainThread onSuccess: (String) -> Unit,
+        @MainThread onError: (String) -> Unit
+    ) {
+        val requestArguments: JSONObject = if (parameters.length() > 0)
             JSONObject(parameters.toString())
         else
-            return "{status:Nothing to update}"
+            return
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents/$documentId", "PUT")
-        writeOutputStream(httpConnection, requestArguments)
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
-    override fun deleteDocument(documentId: String): String {
+    override fun deleteDocument(
+        documentId: String,
+        @MainThread onSuccess: (String) -> Unit,
+        @MainThread onError: (String) -> Unit) {
         val requestArguments = JSONObject()
         requestArguments.put("id", documentId)
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents/$documentId", "DELETE")
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
     override fun processDocumentUrl(
@@ -95,8 +102,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         maxPagesToProcess: Int,
         boostMode: Boolean,
         externalId: String?,
-        parameters: JSONObject?
-    ): String {
+        parameters: JSONObject?,
+        @MainThread onSuccess: (String) -> Unit,
+        @MainThread onError: (String) -> Unit
+    ) {
         val requestArguments: JSONObject = getProcessDocumentUrlArguments(
             fileUrl,
             fileUrls,
@@ -109,11 +118,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         )
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents", "POST")
-        writeOutputStream(httpConnection, requestArguments)
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
     override fun connect(
@@ -131,6 +136,37 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         return BufferedReader(InputStreamReader(inputStream))
     }
 
+    private fun asyncConnection(
+        httpConnection: HttpURLConnection,
+        requestArguments: JSONObject?,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        just(httpConnection)
+            .doOnNext { httpURLConnection ->
+                requestArguments?.let{
+                    writeOutputStream(httpConnection, it)
+                }
+                val jsonResponse = processBufferedReader(connect(httpURLConnection))
+                val mainHandler = Handler(Looper.getMainLooper())
+                mainHandler.post {
+                    onSuccess(jsonResponse)
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ data ->
+                Log.d(TAG, "Consuming item " + data.url)
+            }, { error ->
+                val mainHandler = Handler(Looper.getMainLooper())
+                mainHandler.post {
+                    onError("Veryfi client Error: " + error.localizedMessage)
+                }
+            }).let {
+                disposables.add(it)
+            }
+    }
+
     /**
      * Write outputStream by POST or PUT request.
      * @param httpConnection [HttpURLConnection] httpURLConnection to process
@@ -142,10 +178,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     ) {
         httpConnection.doInput = true
         httpConnection.doOutput = true
+        if (requestArguments.length() == 0) return
         val outputStream: OutputStream = httpConnection.outputStream
         outputStream.write(requestArguments.toString().toByteArray(Charsets.UTF_8))
         outputStream.close()
-        return
     }
 
     /**
@@ -185,9 +221,15 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         val httpConnection = url.openConnection() as HttpURLConnection
         httpConnection.requestMethod = httpVerb
         httpConnection.connectTimeout = timeOut
-        httpConnection.setRequestProperty(Constants.USER_AGENT.value, Constants.USER_AGENT_KOTLIN.value)
+        httpConnection.setRequestProperty(
+            Constants.USER_AGENT.value,
+            Constants.USER_AGENT_KOTLIN.value
+        )
         httpConnection.setRequestProperty(Constants.ACCEPT.value, Constants.APPLICATION_JSON.value)
-        httpConnection.setRequestProperty(Constants.CONTENT_TYPE.value, Constants.APPLICATION_JSON.value)
+        httpConnection.setRequestProperty(
+            Constants.CONTENT_TYPE.value,
+            Constants.APPLICATION_JSON.value
+        )
         httpConnection.setRequestProperty(Constants.CLIENT_ID.value, clientData.clientId)
         httpConnection.setRequestProperty(Constants.AUTHORIZATION.value, getApiKey())
         httpConnection.setRequestProperty(
@@ -303,6 +345,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
             "Job Supplies",
             "Grocery"
         )
+        const val TAG = "VeryfiClient"
     }
 
 }
