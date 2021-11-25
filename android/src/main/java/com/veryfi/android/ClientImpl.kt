@@ -28,7 +28,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
 
     override fun getDocuments(
         @MainThread onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
+        @MainThread onError: (String) -> Unit
     ) {
         val requestArguments = JSONObject()
         val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
@@ -38,7 +38,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     override fun getDocument(
         documentId: String,
         @MainThread onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
+        @MainThread onError: (String) -> Unit
     ) {
         val requestArguments = JSONObject()
         requestArguments.put("id", documentId)
@@ -53,7 +53,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         deleteAfterProcessing: Boolean,
         parameters: JSONObject?,
         @MainThread onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
+        @MainThread onError: (String) -> Unit
     ) {
         val requestArguments =
             getProcessDocumentArguments(
@@ -72,7 +72,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         documentId: String,
         parameters: JSONObject,
         @MainThread onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
+        @MainThread onError: (String) -> Unit
     ) {
         val requestArguments: JSONObject = if (parameters.length() > 0)
             JSONObject(parameters.toString())
@@ -86,7 +86,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     override fun deleteDocument(
         documentId: String,
         @MainThread onSuccess: (String) -> Unit,
-        onError: (String) -> Unit) {
+        @MainThread onError: (String) -> Unit) {
         val requestArguments = JSONObject()
         requestArguments.put("id", documentId)
         val httpConnection =
@@ -104,7 +104,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         externalId: String?,
         parameters: JSONObject?,
         @MainThread onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
+        @MainThread onError: (String) -> Unit
     ) {
         val requestArguments: JSONObject = getProcessDocumentUrlArguments(
             fileUrl,
@@ -158,7 +158,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
             .subscribe({ data ->
                 Log.d(TAG, "Consuming item " + data.url)
             }, { error ->
-                onError("Veryfi client Error: " + error.localizedMessage)
+                val mainHandler = Handler(Looper.getMainLooper())
+                mainHandler.post {
+                    onError("Veryfi client Error: " + error.localizedMessage)
+                }
             }).let {
                 disposables.add(it)
             }
