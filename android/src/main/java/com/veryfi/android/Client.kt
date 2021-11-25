@@ -1,5 +1,6 @@
 package com.veryfi.android
 
+import androidx.annotation.MainThread
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
@@ -19,7 +20,11 @@ interface Client {
      * @param documentId ID of the document you'd like to retrieve.
      * @return the data extracted from the Document [String]
      */
-    fun getDocument(documentId: String): String
+    fun getDocument(
+        documentId: String,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    )
 
     /**
      * Process a document and extract all the fields from it
@@ -35,8 +40,10 @@ interface Client {
         fileName: String,
         categories: List<String>,
         deleteAfterProcessing: Boolean,
-        parameters: JSONObject?
-    ): String
+        parameters: JSONObject?,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    )
 
     /**
      * Update data for a previously processed document, including almost any field like `vendor`, `date`, `notes` and etc.
@@ -44,14 +51,23 @@ interface Client {
      * @param parameters Additional request parameters
      * @return A document json with updated fields, if fields are writable. Otherwise a document with unchanged fields. [String]
      */
-    fun updateDocument(documentId: String, parameters: JSONObject?): String
+    fun updateDocument(
+        documentId: String,
+        parameters: JSONObject,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    )
 
     /**
      * Delete Document from Veryfi
      * @param documentId ID of the document you'd like to delete.
      * @return the response data. [String]
      */
-    fun deleteDocument(documentId: String): String
+    fun deleteDocument(
+        documentId: String,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    )
 
     /**
      * Process Document from url and extract all the fields from it.
@@ -73,8 +89,10 @@ interface Client {
         maxPagesToProcess: Int,
         boostMode: Boolean,
         externalId: String?,
-        parameters: JSONObject?
-    ): String
+        parameters: JSONObject?,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    )
 
     /**
      * connect to URL

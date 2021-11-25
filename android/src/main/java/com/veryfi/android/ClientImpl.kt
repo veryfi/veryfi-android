@@ -26,45 +26,24 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     private val apiVersion = clientData.apiVersion
     private val disposables: CompositeDisposable = CompositeDisposable()
 
-    override fun getDocuments(@MainThread onSuccess: (String) -> Unit, onError: (String) -> Unit) {
-        val requestArguments = JSONObject()
-        val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
-        asyncConnection(httpConnection, onSuccess, onError)
-    }
-
-    private fun asyncConnection(
-        httpConnection: HttpURLConnection,
-        onSuccess: (String) -> Unit,
+    override fun getDocuments(
+        @MainThread onSuccess: (String) -> Unit,
         onError: (String) -> Unit
     ) {
-        just(httpConnection)
-            .doOnNext { httpURLConnection ->
-                val jsonResponse = processBufferedReader(connect(httpURLConnection))
-                val mainHandler = Handler(Looper.getMainLooper())
-                mainHandler.post {
-                    onSuccess(jsonResponse)
-                }
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ data ->
-                Log.d(TAG, "Consuming item " + data.url)
-            }, { error ->
-                onError("Veryfi client Error: " + error.localizedMessage)
-            }).let {
-                disposables.add(it)
-            }
+        val requestArguments = JSONObject()
+        val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
+        asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
-    override fun getDocument(documentId: String): String {
+    override fun getDocument(
+        documentId: String,
+        @MainThread onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
         val requestArguments = JSONObject()
         requestArguments.put("id", documentId)
-        val httpConnection =
-            getHttpURLConnection(requestArguments, "documents/$documentId", "GET")
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        val httpConnection = getHttpURLConnection(requestArguments, "documents/$documentId", "GET")
+        asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
     override fun processDocument(
@@ -72,9 +51,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         fileName: String,
         categories: List<String>,
         deleteAfterProcessing: Boolean,
-        parameters: JSONObject?
-    ): String {
-        if (fileStream.available() == 0) return "{status:file stream doesn't exists}"
+        parameters: JSONObject?,
+        @MainThread onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
         val requestArguments =
             getProcessDocumentArguments(
                 fileStream,
@@ -85,36 +65,33 @@ open class ClientImpl(private val clientData: ClientData) : Client {
             )
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents", "POST")
-        writeOutputStream(httpConnection, requestArguments)
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
-    override fun updateDocument(documentId: String, parameters: JSONObject?): String {
-        val requestArguments: JSONObject = if (parameters != null && parameters.length() > 0)
+    override fun updateDocument(
+        documentId: String,
+        parameters: JSONObject,
+        @MainThread onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val requestArguments: JSONObject = if (parameters.length() > 0)
             JSONObject(parameters.toString())
         else
-            return "{status:Nothing to update}"
+            return
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents/$documentId", "PUT")
-        writeOutputStream(httpConnection, requestArguments)
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
-    override fun deleteDocument(documentId: String): String {
+    override fun deleteDocument(
+        documentId: String,
+        @MainThread onSuccess: (String) -> Unit,
+        onError: (String) -> Unit) {
         val requestArguments = JSONObject()
         requestArguments.put("id", documentId)
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents/$documentId", "DELETE")
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
     override fun processDocumentUrl(
@@ -125,8 +102,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         maxPagesToProcess: Int,
         boostMode: Boolean,
         externalId: String?,
-        parameters: JSONObject?
-    ): String {
+        parameters: JSONObject?,
+        @MainThread onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
         val requestArguments: JSONObject = getProcessDocumentUrlArguments(
             fileUrl,
             fileUrls,
@@ -139,11 +118,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         )
         val httpConnection =
             getHttpURLConnection(requestArguments, "documents", "POST")
-        writeOutputStream(httpConnection, requestArguments)
-        val bufferedReader = connect(httpConnection)
-        val stringResponse = processBufferedReader(bufferedReader)
-        httpConnection.disconnect()
-        return stringResponse
+        asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
     override fun connect(
@@ -161,6 +136,34 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         return BufferedReader(InputStreamReader(inputStream))
     }
 
+    private fun asyncConnection(
+        httpConnection: HttpURLConnection,
+        requestArguments: JSONObject?,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        just(httpConnection)
+            .doOnNext { httpURLConnection ->
+                requestArguments?.let{
+                    writeOutputStream(httpConnection, it)
+                }
+                val jsonResponse = processBufferedReader(connect(httpURLConnection))
+                val mainHandler = Handler(Looper.getMainLooper())
+                mainHandler.post {
+                    onSuccess(jsonResponse)
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ data ->
+                Log.d(TAG, "Consuming item " + data.url)
+            }, { error ->
+                onError("Veryfi client Error: " + error.localizedMessage)
+            }).let {
+                disposables.add(it)
+            }
+    }
+
     /**
      * Write outputStream by POST or PUT request.
      * @param httpConnection [HttpURLConnection] httpURLConnection to process
@@ -172,10 +175,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     ) {
         httpConnection.doInput = true
         httpConnection.doOutput = true
+        if (requestArguments.length() == 0) return
         val outputStream: OutputStream = httpConnection.outputStream
         outputStream.write(requestArguments.toString().toByteArray(Charsets.UTF_8))
         outputStream.close()
-        return
     }
 
     /**
