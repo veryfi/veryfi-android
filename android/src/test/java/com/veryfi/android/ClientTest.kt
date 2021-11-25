@@ -43,7 +43,6 @@ class ClientTest {
         }
         client.getDocuments({ jsonString ->
             val jsonResponse = JSONObject(jsonString)
-            print(jsonResponse)
             assertEquals(2, jsonResponse.length())
         }, { errorMessage ->
             Assert.fail(errorMessage)
@@ -52,28 +51,36 @@ class ClientTest {
 
     @Test
     fun getDocumentTest() {
-        val documentId: Int
-        //if (mockResponses) {
+        if (mockResponses) {
             client = spy(VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey))
-            documentId = 31727276
+            val documentId = 31727276
             val bufferedReader = getFileAsBufferedReader("getDocument.json")
             doReturn(bufferedReader).`when`(client).connect(anyOrNull())
-        //TODO: change for async
-        /*} else {
-            val documents = JSONObject(client.getDocuments { jsonString ->
-                val jsonResponse = JSONObject(jsonString)
-                print(jsonResponse)
-                assertEquals(2, jsonResponse.length())
+            client.getDocument(documentId.toString(), { jsonDocumentString ->
+                val jsonDocumentResponse = JSONObject(jsonDocumentString)
+                assertEquals(documentId, jsonDocumentResponse.getInt("id"))
+            }, {errorMessage ->
+                Assert.fail(errorMessage)
             })
-            if (documents.length() < 1) {
-                print("NO DOCUMENTS IN YOUR ACCOUNT")
-                assertTrue(false)
-                return
-            }
-            documentId = documents.getJSONArray("documents").getJSONObject(0).getInt("id")
-        }*/
-        val jsonResponse = JSONObject(client.getDocument(documentId.toString()))
-        assertEquals(documentId, jsonResponse.getInt("id"))
+        } else {
+            client.getDocuments({ jsonString ->
+                val jsonResponse = JSONObject(jsonString)
+                val jsonDocuments = jsonResponse.getJSONArray("documents")
+                if (jsonDocuments.length() < 1) {
+                    Assert.fail("No documents in your account")
+                    return@getDocuments
+                }
+                val documentId = jsonDocuments.getJSONObject(0).getInt("id")
+                client.getDocument(documentId.toString(), { jsonDocumentString ->
+                    val jsonDocumentResponse = JSONObject(jsonDocumentString)
+                    assertEquals(documentId, jsonDocumentResponse.getInt("id"))
+                }, { errorMessage ->
+                    Assert.fail(errorMessage)
+                })
+            }, { errorMessage ->
+                Assert.fail(errorMessage)
+            })
+        }
     }
 
     @Test
@@ -87,77 +94,55 @@ class ClientTest {
         this::class.java.classLoader?.let {
             val classLoader: ClassLoader = it
             val inputStream: InputStream = classLoader.getResourceAsStream(receiptPath)
-            val jsonResponse =
-                JSONObject(client.processDocument(inputStream, receiptPath, categories, true, null))
-            assertEquals("In-n-out Burger", jsonResponse.getJSONObject("vendor").getString("name"))
+            client.processDocument(inputStream, receiptPath, categories, true, null, {jsonString ->
+                val jsonResponse = JSONObject(jsonString)
+                assertEquals("In-n-out Burger", jsonResponse.getJSONObject("vendor").getString("name"))
+            }, { errorMessage ->
+                Assert.fail(errorMessage)
+            })
         } ?: run {
-            throw java.lang.Exception("Can't get class loader")
+            Assert.fail("Can't get class loader")
         }
     }
 
     @Test
     fun updateDocumentTest() {
-        val documentId: Int
         val notes: String
         val parameters = JSONObject()
-       // if (mockResponses) {
+        if (mockResponses) {
             client = spy(VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey))
             val bufferedReader = getFileAsBufferedReader("updateDocument.json")
             notes = "Note updated"
             parameters.put("notes", notes)
-            documentId = 31727276
-        doReturn(bufferedReader).`when`(client).connect(anyOrNull())
-        //TODO: change for async
-        /*} else {
-            //notes = generateRandomString()
-            parameters.put("notes", notes)
-            val documents = JSONObject(client.getDocuments { jsonString ->
-                val jsonResponse = JSONObject(jsonString)
-                print(jsonResponse)
-                assertEquals(2, jsonResponse.length())
-            })
-            documentId = documents.getJSONArray("documents").getJSONObject(0).getInt("id")
-            */
-        //}
-        val jsonResponse = JSONObject(client.updateDocument(documentId.toString(), parameters))
-        assertEquals(notes, jsonResponse.getString("notes"))
-    }
-
-    @Test
-    fun deleteDocumentTest() {
-        val id: String
-        if (mockResponses) {
-            client = spy(VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey))
-            val bufferedReader = getFileAsBufferedReader("deleteDocument.json")
+            val documentId = 31727276
             doReturn(bufferedReader).`when`(client).connect(anyOrNull())
-            id = "46247222"
+            client.updateDocument(documentId.toString(), parameters, { jsonUpdateString ->
+                val jsonUpdateResponse = JSONObject(jsonUpdateString)
+                assertEquals(notes, jsonUpdateResponse.getString("notes"))
+            }, { errorMessage ->
+                Assert.fail(errorMessage)
+            })
         } else {
-            val url = "https://veryfi-testing-public.s3.us-west-2.amazonaws.com/receipt.jpg"
-            val categories: List<String> = listOf("Advertising & Marketing", "Automotive")
-            val jsonResponse = JSONObject(
-                client.processDocumentUrl(
-                    url,
-                    null,
-                    categories,
-                    false,
-                    1,
-                    true,
-                    null,
-                    null
-                )
-            )
-            id = jsonResponse.getInt("id").toString()
+            notes = generateRandomString()
+            parameters.put("notes", notes)
+            client.getDocuments({ jsonString ->
+                val jsonResponse = JSONObject(jsonString)
+                val jsonDocuments = jsonResponse.getJSONArray("documents")
+                if (jsonDocuments.length() < 1) {
+                    Assert.fail("No documents in your account")
+                    return@getDocuments
+                }
+                val documentId = jsonDocuments.getJSONObject(0).getInt("id")
+                client.updateDocument(documentId.toString(), parameters, { jsonUpdateString ->
+                    val jsonUpdateResponse = JSONObject(jsonUpdateString)
+                    assertEquals(notes, jsonUpdateResponse.getString("notes"))
+                }, { errorMessage ->
+                    Assert.fail(errorMessage)
+                })
+            }, { errorMessage ->
+                Assert.fail(errorMessage)
+            })
         }
-        val deleteJsonResponse = JSONObject(client.deleteDocument(id))
-        val jsonExpectedDeleteResponse = JSONObject("{status:ok,message:Document has been deleted}")
-        assertEquals(
-            jsonExpectedDeleteResponse.getString("status"),
-            deleteJsonResponse.getString("status")
-        )
-        assertEquals(
-            jsonExpectedDeleteResponse.getString("message"),
-            deleteJsonResponse.getString("message")
-        )
     }
 
     @Test
@@ -168,37 +153,98 @@ class ClientTest {
             doReturn(bufferedReader).`when`(client).connect(anyOrNull())
         }
         val url = "https://veryfi-testing-public.s3.us-west-2.amazonaws.com/receipt.jpg"
-        val jsonResponse = JSONObject(
+        client.processDocumentUrl(
+            url,
+            null,
+            null,
+            false,
+            1,
+            true,
+            null,
+            null,
+            { jsonUrlString ->
+                val jsonURLResponse = JSONObject(jsonUrlString)
+                assertEquals("In-n-out Burger", jsonURLResponse.getJSONObject("vendor").getString("name"))
+            }, { errorMessage ->
+                Assert.fail(errorMessage)
+            }
+        )
+    }
+
+    @Test
+    fun deleteDocumentTest() {
+        if (mockResponses) {
+            client = spy(VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey))
+            val bufferedReader = getFileAsBufferedReader("deleteDocument.json")
+            doReturn(bufferedReader).`when`(client).connect(anyOrNull())
+            val id = 46247222
+            client.deleteDocument(id.toString(), { jsonDeleteString ->
+                val jsonDeleteResponse = JSONObject(jsonDeleteString)
+                val jsonExpectedDeleteResponse =
+                    JSONObject("{status:ok,message:Document has been deleted}")
+                assertEquals(
+                    jsonExpectedDeleteResponse.getString("status"),
+                    jsonDeleteResponse.getString("status")
+                )
+                assertEquals(
+                    jsonExpectedDeleteResponse.getString("message"),
+                    jsonDeleteResponse.getString("message")
+                )
+            }, { errorMessage ->
+                Assert.fail(errorMessage)
+            })
+        } else {
+            val url = "https://veryfi-testing-public.s3.us-west-2.amazonaws.com/receipt.jpg"
+            val categories: List<String> = listOf("Advertising & Marketing", "Automotive")
             client.processDocumentUrl(
                 url,
                 null,
-                null,
-                true,
+                categories,
+                false,
                 1,
                 true,
                 null,
-                null
+                null,
+                { jsonUrlString ->
+                    val jsonURLResponse = JSONObject(jsonUrlString)
+                    val id = jsonURLResponse.getInt("id")
+                    client.deleteDocument(id.toString(), { jsonDeleteString ->
+                        val jsonDeleteResponse = JSONObject(jsonDeleteString)
+                        val jsonExpectedDeleteResponse =
+                            JSONObject("{status:ok,message:Document has been deleted}")
+                        assertEquals(
+                            jsonExpectedDeleteResponse.getString("status"),
+                            jsonDeleteResponse.getString("status")
+                        )
+                        assertEquals(
+                            jsonExpectedDeleteResponse.getString("message"),
+                            jsonDeleteResponse.getString("message")
+                        )
+                    }, { errorMessage ->
+                        Assert.fail(errorMessage)
+                    })
+                }, { errorMessage ->
+                    Assert.fail(errorMessage)
+                }
             )
-        )
-        assertEquals("In-n-out Burger", jsonResponse.getJSONObject("vendor").getString("name"))
+        }
     }
 
     @Test
     fun processBadCredentialsTest() {
-        //TODO: change for async
-        /*client = VeryfiClientFactory.createClient(
+
+        client = VeryfiClientFactory.createClient(
             "badClientId",
             "badClientSecret",
             "badUsername",
             "badApiKey"
         )
-        val getDocumentsResponse = client.getDocuments { jsonString ->
+        client.getDocuments({ jsonString ->
             val jsonResponse = JSONObject(jsonString)
-            print(jsonResponse)
-            assertEquals(2, jsonResponse.length())
-        }
-        val jsonResponse = JSONObject(getDocumentsResponse)
-        assertEquals("fail", jsonResponse.getString("status"))*/
+            assertEquals("fail", jsonResponse.getString("status"))
+        }, { errorMessage ->
+            Assert.fail(errorMessage)
+        })
     }
 
     private fun getFileAsBufferedReader(fileName: String): BufferedReader? {
