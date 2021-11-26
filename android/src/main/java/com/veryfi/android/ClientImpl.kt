@@ -136,6 +136,13 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         return BufferedReader(InputStreamReader(inputStream))
     }
 
+    /**
+     * Method to launch an asynchronous connection to the API.
+     * @param httpConnection [HttpURLConnection] httpURLConnection to process.
+     * @param requestArguments [JSONObject] requestArgument to send.
+     * @param onSuccess
+     * @param onError
+     */
     private fun asyncConnection(
         httpConnection: HttpURLConnection,
         requestArguments: JSONObject?,
@@ -263,6 +270,9 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         return Base64.encodeToString(macBytes, Base64.DEFAULT)
     }
 
+    /**
+     * Generate the api key to call the API.
+     */
     private fun getApiKey(): String {
         return "apikey ${clientData.username}:${clientData.apiKey}"
     }

@@ -1,19 +1,23 @@
 package com.veryfi.android
 
-import androidx.annotation.MainThread
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
-import java.lang.Exception
 import java.net.HttpURLConnection
 
+/**
+ * Client class to make async calls to Veryfi API.
+ */
 interface Client {
 
     /**
      * Returns a json string [String] list of documents.
      * @return the list of previously processed documents [String]
      */
-    fun getDocuments(onSuccess: (String) -> Unit, onError: (String) -> Unit)
+    fun getDocuments(
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    )
 
     /**
      * Returns a json string [String] document information
