@@ -1,24 +1,30 @@
 package com.veryfi.android
 
-import androidx.annotation.MainThread
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
-import java.lang.Exception
 import java.net.HttpURLConnection
 
+/**
+ * Client class to make async calls to Veryfi API.
+ */
 interface Client {
 
     /**
      * Returns a json string [String] list of documents.
-     * @return the list of previously processed documents [String]
+     * @param onSuccess Async callback in success case.
+     * @param onError Async callback in error case.
      */
-    fun getDocuments(onSuccess: (String) -> Unit, onError: (String) -> Unit)
+    fun getDocuments(
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    )
 
     /**
      * Returns a json string [String] document information
      * @param documentId ID of the document you'd like to retrieve.
-     * @return the data extracted from the Document [String]
+     * @param onSuccess Async callback in success case.
+     * @param onError Async callback in error case.
      */
     fun getDocument(
         documentId: String,
@@ -33,7 +39,8 @@ interface Client {
      * @param categories List of categories Veryfi can use to categorize the document
      * @param deleteAfterProcessing Delete this document from Veryfi after data has been extracted
      * @param parameters Additional request parameters
-     * @return the data extracted from the Document [String]
+     * @param onSuccess Async callback in success case.
+     * @param onError Async callback in error case.
      */
     fun processDocument(
         fileStream: InputStream,
@@ -49,7 +56,8 @@ interface Client {
      * Update data for a previously processed document, including almost any field like `vendor`, `date`, `notes` and etc.
      * @param documentId ID of the document you'd like to update.
      * @param parameters Additional request parameters
-     * @return A document json with updated fields, if fields are writable. Otherwise a document with unchanged fields. [String]
+     * @param onSuccess Async callback in success case.
+     * @param onError Async callback in error case.
      */
     fun updateDocument(
         documentId: String,
@@ -61,7 +69,8 @@ interface Client {
     /**
      * Delete Document from Veryfi
      * @param documentId ID of the document you'd like to delete.
-     * @return the response data. [String]
+     * @param onSuccess Async callback in success case.
+     * @param onError Async callback in error case.
      */
     fun deleteDocument(
         documentId: String,
@@ -79,7 +88,8 @@ interface Client {
      * @param boostMode Flag that tells Veryfi whether boost mode should be enabled. When set to 1, Veryfi will skip data enrichment steps, but will process the document faster. Default value for this flag is 0
      * @param externalId Optional custom document identifier. Use this if you would like to assign your own ID to documents
      * @param parameters Additional request parameters
-     * @return the data extracted from the Document [String]
+     * @param onSuccess Async callback in success case.
+     * @param onError Async callback in error case.
      */
     fun processDocumentUrl(
         fileUrl: String,
