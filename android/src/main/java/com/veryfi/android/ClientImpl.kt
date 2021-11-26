@@ -140,8 +140,8 @@ open class ClientImpl(private val clientData: ClientData) : Client {
      * Method to launch an asynchronous connection to the API.
      * @param httpConnection [HttpURLConnection] httpURLConnection to process.
      * @param requestArguments [JSONObject] requestArgument to send.
-     * @param onSuccess
-     * @param onError
+     * @param onSuccess Async callback in success case returns an String.
+     * @param onError Async callback in error case returns an String.
      */
     private fun asyncConnection(
         httpConnection: HttpURLConnection,
