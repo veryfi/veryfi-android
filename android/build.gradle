@@ -9,55 +9,59 @@ plugins {
 group = 'com.veryfi'
 version = '1.0.0'
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = 'com.veryfi'
-            artifactId = 'veryfi-android'
-            pom {
-                name = 'Veryfi Android'
-                description = 'Android kotlin module for communicating with the Veryfi OCR API'
-                url = 'https://github.com/veryfi/veryfi-android'
-                licenses {
-                    license {
-                        name = 'MIT'
-                        url = 'https://opensource.org/licenses/MIT'
+afterEvaluate{
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.veryfi'
+                artifactId = 'veryfi-android'
+                version = '1.0.0'
+                pom {
+                    name = 'Veryfi Android'
+                    description = 'Android kotlin module for communicating with the Veryfi OCR API'
+                    url = 'https://github.com/veryfi/veryfi-android'
+                    licenses {
+                        license {
+                            name = 'MIT'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
                     }
-                }
-                developers {
-                    developer {
-                        id = 'androide0917'
-                        name = 'Yuber Garcia'
-                        email = 'yubergarcia@veryfi.com'
+                    developers {
+                        developer {
+                            id = 'androide0917'
+                            name = 'Yuber Garcia'
+                            email = 'yubergarcia@veryfi.com'
+                        }
+                        developer {
+                            id = 'kaevan89'
+                            name = 'Sebastian Carmona'
+                            email = 'sebastiancarmona@veryfi.com'
+                        }
+                        developer {
+                            id = 'alejouribesanchez'
+                            name = 'Alejandro Uribe'
+                            email = 'alejandro@veryfi.com'
+                        }
                     }
-                    developer {
-                        id = 'kaevan89'
-                        name = 'Sebastian Carmona'
-                        email = 'sebastiancarmona@veryfi.com'
+                    scm {
+                        connection = 'scm:git:git://github.com/veryfi/veryfi-android.git'
+                        developerConnection = 'scm:git:ssh://github.com/veryfi/veryfi-android.git'
+                        url = 'https://github.com/veryfi/veryfi-android/'
                     }
-                    developer {
-                        id = 'alejouribesanchez'
-                        name = 'Alejandro Uribe'
-                        email = 'alejandro@veryfi.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/veryfi/veryfi-android.git'
-                    developerConnection = 'scm:git:ssh://github.com/veryfi/veryfi-android.git'
-                    url = 'https://github.com/veryfi/veryfi-android/'
                 }
             }
         }
-    }
-    repositories {
-        maven {
-            name = "OSSRH"
-            def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases'
-            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots'
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            credentials {
-                username System.getenv("MAVEN_USERNAME")
-                password System.getenv("MAVEN_PASSWORD")
+        repositories {
+            maven {
+                name = "OSSRH"
+                def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases'
+                def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots'
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username = System.getenv("MAVEN_USERNAME")
+                    password = System.getenv("MAVEN_PASSWORD")
+                }
             }
         }
     }
