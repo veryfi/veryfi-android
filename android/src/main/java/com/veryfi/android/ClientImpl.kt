@@ -223,8 +223,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     ): HttpURLConnection {
         val date = Date()
         val timeStamp: Long = date.time
-        val partnerURL = "${baseUrl}v${apiVersion}/partner"
-        val url = URL("$partnerURL/$endPoint/")
+        val url = URL("${baseUrl}v${apiVersion}/${endPoint}/")
         val httpConnection = url.openConnection() as HttpURLConnection
         httpConnection.requestMethod = httpVerb
         httpConnection.connectTimeout = timeOut
