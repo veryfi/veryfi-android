@@ -6,10 +6,10 @@ import android.util.Base64
 import android.util.Log
 import androidx.annotation.MainThread
 import io.reactivex.Observable.just
-import org.json.JSONObject
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -86,7 +86,8 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     override fun deleteDocument(
         documentId: String,
         @MainThread onSuccess: (String) -> Unit,
-        @MainThread onError: (String) -> Unit) {
+        @MainThread onError: (String) -> Unit
+    ) {
         val requestArguments = JSONObject()
         requestArguments.put("id", documentId)
         val httpConnection =
@@ -151,7 +152,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     ) {
         just(httpConnection)
             .doOnNext { httpURLConnection ->
-                requestArguments?.let{
+                requestArguments?.let {
                     writeOutputStream(httpConnection, it)
                 }
                 val jsonResponse = processBufferedReader(connect(httpURLConnection))
@@ -223,7 +224,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     ): HttpURLConnection {
         val date = Date()
         val timeStamp: Long = date.time
-        val url = URL("${baseUrl}v${apiVersion}/${endPoint}/")
+        val url = URL("${baseUrl}v${apiVersion}/${PARTNER}/${endPoint}/")
         val httpConnection = url.openConnection() as HttpURLConnection
         httpConnection.requestMethod = httpVerb
         httpConnection.connectTimeout = timeOut
@@ -355,6 +356,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
             "Grocery"
         )
         const val TAG = "VeryfiClient"
+        const val PARTNER = "partner"
     }
 
 }

@@ -43,7 +43,7 @@ class ClientTest {
         }
         client.getDocuments({ jsonString ->
             val jsonResponse = JSONObject(jsonString)
-            assertEquals(2, jsonResponse.length())
+            Assert.assertTrue(jsonResponse.length() > 0)
         }, { errorMessage ->
             Assert.fail(errorMessage)
         })
@@ -59,7 +59,7 @@ class ClientTest {
             client.getDocument(documentId.toString(), { jsonDocumentString ->
                 val jsonDocumentResponse = JSONObject(jsonDocumentString)
                 assertEquals(documentId, jsonDocumentResponse.getInt("id"))
-            }, {errorMessage ->
+            }, { errorMessage ->
                 Assert.fail(errorMessage)
             })
         } else {
@@ -94,9 +94,12 @@ class ClientTest {
         this::class.java.classLoader?.let {
             val classLoader: ClassLoader = it
             val inputStream: InputStream = classLoader.getResourceAsStream(receiptPath)
-            client.processDocument(inputStream, receiptPath, categories, true, null, {jsonString ->
+            client.processDocument(inputStream, receiptPath, categories, true, null, { jsonString ->
                 val jsonResponse = JSONObject(jsonString)
-                assertEquals("In-n-out Burger", jsonResponse.getJSONObject("vendor").getString("name"))
+                assertEquals(
+                    "In-n-out Burger",
+                    jsonResponse.getJSONObject("vendor").getString("name")
+                )
             }, { errorMessage ->
                 Assert.fail(errorMessage)
             })
@@ -164,7 +167,10 @@ class ClientTest {
             null,
             { jsonUrlString ->
                 val jsonURLResponse = JSONObject(jsonUrlString)
-                assertEquals("In-n-out Burger", jsonURLResponse.getJSONObject("vendor").getString("name"))
+                assertEquals(
+                    "In-n-out Burger",
+                    jsonURLResponse.getJSONObject("vendor").getString("name")
+                )
             }, { errorMessage ->
                 Assert.fail(errorMessage)
             }
