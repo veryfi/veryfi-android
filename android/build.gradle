@@ -140,9 +140,6 @@ dependencies {
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation 'org.json:json:20180813'
 
-    //Kover
-    implementation "androidx.core:core-ktx:1.8.0"
-
     //RxAndroid for async calls
     implementation 'io.reactivex.rxjava2:rxjava:2.2.4'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
