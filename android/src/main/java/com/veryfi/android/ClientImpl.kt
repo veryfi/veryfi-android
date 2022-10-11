@@ -9,6 +9,7 @@ import io.reactivex.Observable.just
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
@@ -304,8 +305,8 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         fileStream: InputStream, fileName: String, categoriesIn: List<String?>?,
         deleteAfterProcessing: Boolean, parameters: JSONObject?
     ): JSONObject {
-        val categories = if (categoriesIn == null || categoriesIn.isEmpty())
-            LIST_CATEGORIES else categoriesIn
+        val categories = JSONArray(if (categoriesIn == null || categoriesIn.isEmpty())
+            LIST_CATEGORIES else categoriesIn)
         val base64EncodedString = Base64.encodeToString(fileStream.readBytes(), Base64.DEFAULT)
         val requestArguments: JSONObject = if (parameters != null)
             JSONObject(parameters.toString()) else JSONObject()
@@ -333,10 +334,8 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         deleteAfterProcessing: Boolean, maxPagesToProcess: Int,
         boostMode: Boolean, externalId: String?, parameters: JSONObject?
     ): JSONObject {
-        var categories = categoriesIn
-        if (categories == null || categories.isEmpty()) {
-            categories = LIST_CATEGORIES
-        }
+        val categories = JSONArray(if (categoriesIn == null || categoriesIn.isEmpty())
+            LIST_CATEGORIES else categoriesIn)
         val requestArguments = if (parameters != null)
             JSONObject(parameters.toString()) else JSONObject()
         requestArguments.put(Constants.AUTO_DELETE.value, deleteAfterProcessing)
