@@ -9,6 +9,7 @@ import io.reactivex.Observable.just
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
@@ -27,11 +28,20 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     private val disposables: CompositeDisposable = CompositeDisposable()
 
     override fun getDocuments(
+        page: Int?,
+        pageSize: Int?,
         @MainThread onSuccess: (String) -> Unit,
         @MainThread onError: (String) -> Unit
     ) {
+        var query: String? = null
+        page?.let {
+            query = "page=${page}"
+            pageSize?.let {
+                query = "${query}&page_size=${pageSize}"
+            }
+        }
         val requestArguments = JSONObject()
-        val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET")
+        val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET", query)
         asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
@@ -220,11 +230,16 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     private fun getHttpURLConnection(
         requestArguments: JSONObject,
         endPoint: String,
-        httpVerb: String
+        httpVerb: String,
+        query: String? = null
     ): HttpURLConnection {
         val date = Date()
         val timeStamp: Long = date.time
-        val url = URL("${baseUrl}v${apiVersion}/${PARTNER}/${endPoint}/")
+        var stringUrl = "${baseUrl}v${apiVersion}/${PARTNER}/${endPoint}"
+        query?.let {
+            stringUrl = "${stringUrl}?${query}"
+        }
+        val url = URL(stringUrl)
         val httpConnection = url.openConnection() as HttpURLConnection
         httpConnection.requestMethod = httpVerb
         httpConnection.connectTimeout = timeOut
@@ -290,8 +305,8 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         fileStream: InputStream, fileName: String, categoriesIn: List<String?>?,
         deleteAfterProcessing: Boolean, parameters: JSONObject?
     ): JSONObject {
-        val categories = if (categoriesIn == null || categoriesIn.isEmpty())
-            LIST_CATEGORIES else categoriesIn
+        val categories = JSONArray(if (categoriesIn == null || categoriesIn.isEmpty())
+            LIST_CATEGORIES else categoriesIn)
         val base64EncodedString = Base64.encodeToString(fileStream.readBytes(), Base64.DEFAULT)
         val requestArguments: JSONObject = if (parameters != null)
             JSONObject(parameters.toString()) else JSONObject()
@@ -319,10 +334,8 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         deleteAfterProcessing: Boolean, maxPagesToProcess: Int,
         boostMode: Boolean, externalId: String?, parameters: JSONObject?
     ): JSONObject {
-        var categories = categoriesIn
-        if (categories == null || categories.isEmpty()) {
-            categories = LIST_CATEGORIES
-        }
+        val categories = JSONArray(if (categoriesIn == null || categoriesIn.isEmpty())
+            LIST_CATEGORIES else categoriesIn)
         val requestArguments = if (parameters != null)
             JSONObject(parameters.toString()) else JSONObject()
         requestArguments.put(Constants.AUTO_DELETE.value, deleteAfterProcessing)
@@ -358,5 +371,4 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         const val TAG = "VeryfiClient"
         const val PARTNER = "partner"
     }
-
 }

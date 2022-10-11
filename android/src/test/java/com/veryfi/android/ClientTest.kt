@@ -41,10 +41,10 @@ class ClientTest {
             val bufferedReader = getFileAsBufferedReader("getDocuments.json")
             doReturn(bufferedReader).`when`(client).connect(anyOrNull())
         }
-        client.getDocuments({ jsonString ->
+        client.getDocuments( 1, 20, onSuccess = { jsonString ->
             val jsonResponse = JSONObject(jsonString)
             Assert.assertTrue(jsonResponse.length() > 0)
-        }, { errorMessage ->
+        }, onError = { errorMessage ->
             Assert.fail(errorMessage)
         })
     }
@@ -63,7 +63,7 @@ class ClientTest {
                 Assert.fail(errorMessage)
             })
         } else {
-            client.getDocuments({ jsonString ->
+            client.getDocuments(onSuccess = { jsonString ->
                 val jsonResponse = JSONObject(jsonString)
                 val jsonDocuments = jsonResponse.getJSONArray("documents")
                 if (jsonDocuments.length() < 1) {
@@ -77,7 +77,7 @@ class ClientTest {
                 }, { errorMessage ->
                     Assert.fail(errorMessage)
                 })
-            }, { errorMessage ->
+            }, onError = { errorMessage ->
                 Assert.fail(errorMessage)
             })
         }
@@ -128,7 +128,7 @@ class ClientTest {
         } else {
             notes = generateRandomString()
             parameters.put("notes", notes)
-            client.getDocuments({ jsonString ->
+            client.getDocuments(onSuccess = { jsonString ->
                 val jsonResponse = JSONObject(jsonString)
                 val jsonDocuments = jsonResponse.getJSONArray("documents")
                 if (jsonDocuments.length() < 1) {
@@ -142,7 +142,7 @@ class ClientTest {
                 }, { errorMessage ->
                     Assert.fail(errorMessage)
                 })
-            }, { errorMessage ->
+            }, onError = { errorMessage ->
                 Assert.fail(errorMessage)
             })
         }
@@ -245,10 +245,10 @@ class ClientTest {
             "badUsername",
             "badApiKey"
         )
-        client.getDocuments({ jsonString ->
+        client.getDocuments( onSuccess = { jsonString ->
             val jsonResponse = JSONObject(jsonString)
             assertEquals("fail", jsonResponse.getString("status"))
-        }, { errorMessage ->
+        }, onError = { errorMessage ->
             Assert.fail(errorMessage)
         })
     }
