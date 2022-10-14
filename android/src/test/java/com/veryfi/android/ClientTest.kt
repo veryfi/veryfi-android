@@ -9,6 +9,7 @@ import io.reactivex.plugins.RxJavaPlugins
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.anyOrNull
@@ -17,6 +18,7 @@ import org.mockito.kotlin.spy
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 
@@ -41,7 +43,11 @@ class ClientTest {
             val bufferedReader = getFileAsBufferedReader("getDocuments.json")
             doReturn(bufferedReader).`when`(client).connect(anyOrNull())
         }
-        client.getDocuments( 1, 20, onSuccess = { jsonString ->
+        val getQuery = GetQuery(
+            page = 1,
+            page_size = 20
+        )
+        client.getDocuments( getQuery, onSuccess = { jsonString ->
             val jsonResponse = JSONObject(jsonString)
             Assert.assertTrue(jsonResponse.length() > 0)
         }, onError = { errorMessage ->
@@ -260,6 +266,49 @@ class ClientTest {
             return BufferedReader(InputStreamReader(inputStream, "UTF-8"))
         }
         return null
+    }
+
+    @Test
+    fun getVoidQueryTest() {
+        val getQuery = GetQuery()
+        assertNull(getQuery.getQueryString())
+    }
+
+    @Test
+    fun getFullQueryTest() {
+        val query = "external_id"
+        val page = 1
+        val page_size = 20
+        val return_audit_trail = false
+        val external_id = "abcdjp"
+        val status = "gr"
+        val tag = "energy"
+        val date = LocalDate.of(2022, 1, 20)
+        val getQuery = GetQuery(
+            query,
+            page,
+            page_size,
+            return_audit_trail,
+            external_id,
+            status,
+            tag,
+            date,
+            date,
+            date,
+            date,
+            date,
+            date,
+            date,
+            date,
+            date,
+            date,
+            date,
+            date
+        )
+        assertEquals(
+            "q=external_id&page=1&page_size=20&return_audit_trail=false&external_id=abcdjp&status=gr&tag=energy&created__gt=2022-01-20&created__lt=2022-01-20&created__gte=2022-01-20&created__lte=2022-01-20&updated__gt=2022-01-20&updated__lt=2022-01-20&updated__gte=2022-01-20&updated__lte=2022-01-20&date__gt=2022-01-20&date__lt=2022-01-20&date__gte=2022-01-20&date__lte=2022-01-20",
+            getQuery.getQueryString()
+        )
     }
 
     private fun generateRandomString(): String {

@@ -12,14 +12,12 @@ interface Client {
 
     /**
      * Returns a json string [String] list of documents.
-     * @param page page number.
-     * @param pageSize set the page Size.
+     * @param getQuery GetQuery object.
      * @param onSuccess Async callback in success case.
      * @param onError Async callback in error case.
      */
     fun getDocuments(
-        page: Int? = null,
-        pageSize: Int? = null,
+        getQuery: GetQuery? = null,
         onSuccess: (String) -> Unit,
         onError: (String) -> Unit
     )
