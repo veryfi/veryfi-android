@@ -28,18 +28,11 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     private val disposables: CompositeDisposable = CompositeDisposable()
 
     override fun getDocuments(
-        page: Int?,
-        pageSize: Int?,
+        getQuery: GetQuery?,
         @MainThread onSuccess: (String) -> Unit,
         @MainThread onError: (String) -> Unit
     ) {
-        var query: String? = null
-        page?.let {
-            query = "page=${page}"
-            pageSize?.let {
-                query = "${query}&page_size=${pageSize}"
-            }
-        }
+        val query = getQuery?.getQueryString()
         val requestArguments = JSONObject()
         val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET", query)
         asyncConnection(httpConnection, null, onSuccess, onError)
