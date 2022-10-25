@@ -280,6 +280,7 @@ class ClientTest {
         val page = 1
         val page_size = 20
         val return_audit_trail = false
+        val order_by = "created"
         val external_id = "abcdjp"
         val status = "gr"
         val tag = "energy"
@@ -289,6 +290,7 @@ class ClientTest {
             page,
             page_size,
             return_audit_trail,
+            order_by,
             external_id,
             status,
             tag,
@@ -306,7 +308,7 @@ class ClientTest {
             date
         )
         assertEquals(
-            "q=external_id&page=1&page_size=20&return_audit_trail=false&external_id=abcdjp&status=gr&tag=energy&created__gt=2022-01-20&created__lt=2022-01-20&created__gte=2022-01-20&created__lte=2022-01-20&updated__gt=2022-01-20&updated__lt=2022-01-20&updated__gte=2022-01-20&updated__lte=2022-01-20&date__gt=2022-01-20&date__lt=2022-01-20&date__gte=2022-01-20&date__lte=2022-01-20",
+            "q=external_id&page=1&page_size=20&return_audit_trail=false&order_by=created&external_id=abcdjp&status=gr&tag=energy&created__gt=2022-01-20&created__lt=2022-01-20&created__gte=2022-01-20&created__lte=2022-01-20&updated__gt=2022-01-20&updated__lt=2022-01-20&updated__gte=2022-01-20&updated__lte=2022-01-20&date__gt=2022-01-20&date__lt=2022-01-20&date__gte=2022-01-20&date__lte=2022-01-20",
             getQuery.getQueryString()
         )
     }
