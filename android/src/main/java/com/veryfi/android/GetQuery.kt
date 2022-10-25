@@ -11,6 +11,7 @@ class GetQuery(
     private val page: Int? = null,
     private val page_size: Int? = null,
     private val return_audit_trail: Boolean? = null,
+    private val order_by: String? = null,
     private val external_id: String? = null,
     private val status: String? = null,
     private val tag: String? = null,
@@ -75,6 +76,7 @@ class GetQuery(
         appendQuery(GetQuery.page, page)
         appendQuery(GetQuery.page_size, page_size)
         appendQuery(GetQuery.return_audit_trail, return_audit_trail)
+        appendQuery(GetQuery.order_by, order_by)
         appendQuery(GetQuery.external_id, external_id)
         appendQuery(GetQuery.status, status)
         appendQuery(GetQuery.tag, tag)
@@ -100,6 +102,7 @@ class GetQuery(
         const val page = "page"
         const val page_size = "page_size"
         const val return_audit_trail = "return_audit_trail"
+        const val order_by = "order_by"
         const val external_id = "external_id"
         const val status = "status"
         const val tag = "tag"
