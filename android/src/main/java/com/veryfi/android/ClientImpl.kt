@@ -311,8 +311,8 @@ open class ClientImpl(private val clientData: ClientData) : Client {
                 LIST_CATEGORIES else categoriesIn
         )
         val base64EncodedString = Base64.encodeToString(fileStream.readBytes(), Base64.DEFAULT)
-        val requestArguments: JSONObject = (if (parameters != null)
-            JSONObject(parameters.toString()) else JSONObject())
+        val requestArguments: JSONObject = if (parameters != null)
+            JSONObject(parameters.toString()) else JSONObject()
 
         return requestArguments.apply {
             put(Constants.FILE_NAME.value, fileName)
