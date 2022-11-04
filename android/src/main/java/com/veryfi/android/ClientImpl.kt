@@ -190,11 +190,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         with(httpConnection) {
             doInput = true
             doOutput = true
-        }
-
-        with(httpConnection.outputStream) {
-            write(requestArguments.toString().toByteArray(Charsets.UTF_8))
-            close()
+            with(outputStream) {
+                write(requestArguments.toString().toByteArray(Charsets.UTF_8))
+                close()
+            }
         }
     }
 
