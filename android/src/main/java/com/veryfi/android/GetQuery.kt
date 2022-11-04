@@ -31,25 +31,7 @@ class GetQuery(
 
     private var bQuery = ""
 
-    private fun appendQuery(name: String, value: Int?) {
-        value?.let {
-            bQuery = if (bQuery.isEmpty()) "${name}=${it}" else "${bQuery}&${name}=${it}"
-        }
-    }
-
-    private fun appendQuery(name: String, value: String?) {
-        value?.let {
-            bQuery = if (bQuery.isEmpty()) "${name}=${it}" else "${bQuery}&${name}=${it}"
-        }
-    }
-
-    private fun appendQuery(name: String, value: LocalDate?) {
-        value?.let {
-            bQuery = if (bQuery.isEmpty()) "${name}=${it}" else "${bQuery}&${name}=${it}"
-        }
-    }
-
-    private fun appendQuery(name: String, value: Boolean?) {
+    private fun appendQuery(name: String, value: Any?) {
         value?.let {
             bQuery = if (bQuery.isEmpty()) "${name}=${it}" else "${bQuery}&${name}=${it}"
         }
