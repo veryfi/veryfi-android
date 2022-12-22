@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.veryfi'
-version = '1.0.6'
+version = '1.0.7'
 
 afterEvaluate{
     publishing {
@@ -16,7 +16,7 @@ afterEvaluate{
                 from components.release
                 groupId = 'com.veryfi'
                 artifactId = 'veryfi-android'
-                version = '1.0.6'
+                version = '1.0.7'
                 pom {
                     name = 'Veryfi Android'
                     description = 'Android kotlin module for communicating with the Veryfi OCR API'
