@@ -13,7 +13,7 @@ enum class Constants(val value: String) {
     /**
      * header for HttpRequest
      */
-    USER_AGENT_KOTLIN("Kotlin Veryfi-Kotlin/1.0.6"),
+    USER_AGENT_ANDROID("Android Veryfi-Android/1.0.7"),
 
     /**
      * header for HttpRequest
