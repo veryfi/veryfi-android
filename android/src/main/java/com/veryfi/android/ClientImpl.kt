@@ -238,7 +238,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         httpConnection.connectTimeout = timeOut
         httpConnection.setRequestProperty(
             Constants.USER_AGENT.value,
-            Constants.USER_AGENT_KOTLIN.value
+            Constants.USER_AGENT_ANDROID.value
         )
         httpConnection.setRequestProperty(Constants.ACCEPT.value, Constants.APPLICATION_JSON.value)
         httpConnection.setRequestProperty(
