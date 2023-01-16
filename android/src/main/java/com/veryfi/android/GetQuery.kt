@@ -27,47 +27,13 @@ class GetQuery(
     private val date__lt: LocalDate? = null,
     private val date__gte: LocalDate? = null,
     private val date__lte: LocalDate? = null,
-    ) {
+) {
 
     private var bQuery = ""
 
-    private fun appendQuery(name: String, value: Int?) {
+    private fun appendQuery(name: String, value: Any?) {
         value?.let {
-            if (bQuery.isEmpty()) {
-                bQuery = "${name}=${value}"
-                return
-            }
-            bQuery = "${bQuery}&${name}=${value}"
-        }
-    }
-
-    private fun appendQuery(name: String, value: String?) {
-        value?.let {
-            if (bQuery.isEmpty()) {
-                bQuery = "${name}=${value}"
-                return
-            }
-            bQuery = "${bQuery}&${name}=${value}"
-        }
-    }
-
-    private fun appendQuery(name: String, value: LocalDate?) {
-        value?.let {
-            if (bQuery.isEmpty()) {
-                bQuery = "${name}=${value}"
-                return
-            }
-            bQuery = "${bQuery}&${name}=${value}"
-        }
-    }
-
-    private fun appendQuery(name: String, value: Boolean?) {
-        value?.let {
-            if (bQuery.isEmpty()) {
-                bQuery = "${name}=${value}"
-                return
-            }
-            bQuery = "${bQuery}&${name}=${value}"
+            bQuery = if (bQuery.isEmpty()) "${name}=${it}" else "${bQuery}&${name}=${it}"
         }
     }
 
@@ -92,9 +58,7 @@ class GetQuery(
         appendQuery(GetQuery.date__lt, date__lt)
         appendQuery(GetQuery.date__gte, date__gte)
         appendQuery(GetQuery.date__lte, date__lte)
-        val returnQuery = bQuery
-        bQuery = ""
-        return if(returnQuery.isEmpty()) null else returnQuery
+        return if (bQuery.isEmpty()) null else bQuery
     }
 
     companion object {
@@ -118,6 +82,7 @@ class GetQuery(
         const val date__lt = "date__lt"
         const val date__gte = "date__gte"
         const val date__lte = "date__lte"
+
         @RequiresApi(Build.VERSION_CODES.O)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     }

@@ -34,7 +34,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     ) {
         val query = getQuery?.getQueryString()
         val requestArguments = JSONObject()
-        val httpConnection = getHttpURLConnection(requestArguments, "documents", "GET", query)
+        val httpConnection = getHttpURLConnection(requestArguments, "documents", GET, query)
         asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
@@ -45,7 +45,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
     ) {
         val requestArguments = JSONObject()
         requestArguments.put("id", documentId)
-        val httpConnection = getHttpURLConnection(requestArguments, "documents/$documentId", "GET")
+        val httpConnection = getHttpURLConnection(requestArguments, "documents/$documentId", GET)
         asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
@@ -66,8 +66,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
                 deleteAfterProcessing,
                 parameters
             )
-        val httpConnection =
-            getHttpURLConnection(requestArguments, "documents", "POST")
+        val httpConnection = getHttpURLConnection(requestArguments, "documents", POST)
         asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
@@ -82,7 +81,7 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         else
             return
         val httpConnection =
-            getHttpURLConnection(requestArguments, "documents/$documentId", "PUT")
+            getHttpURLConnection(requestArguments, "documents/$documentId", PUT)
         asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
@@ -91,10 +90,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         @MainThread onSuccess: (String) -> Unit,
         @MainThread onError: (String) -> Unit
     ) {
-        val requestArguments = JSONObject()
-        requestArguments.put("id", documentId)
-        val httpConnection =
-            getHttpURLConnection(requestArguments, "documents/$documentId", "DELETE")
+        val requestArguments = JSONObject().apply {
+            put("id", documentId)
+        }
+        val httpConnection = getHttpURLConnection(requestArguments, "documents/$documentId", DELETE)
         asyncConnection(httpConnection, null, onSuccess, onError)
     }
 
@@ -121,14 +120,14 @@ open class ClientImpl(private val clientData: ClientData) : Client {
             parameters
         )
         val httpConnection =
-            getHttpURLConnection(requestArguments, "documents", "POST")
+            getHttpURLConnection(requestArguments, "documents", POST)
         asyncConnection(httpConnection, requestArguments, onSuccess, onError)
     }
 
     override fun connect(
         httpConnection: HttpURLConnection
     ): BufferedReader {
-        if (httpConnection.requestMethod == "GET" || httpConnection.requestMethod == "DELETE") {
+        if (httpConnection.requestMethod == GET || httpConnection.requestMethod == DELETE) {
             httpConnection.connect()
         }
         val inputStream: InputStream = try {
@@ -187,12 +186,15 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         httpConnection: HttpURLConnection,
         requestArguments: JSONObject
     ) {
-        httpConnection.doInput = true
-        httpConnection.doOutput = true
         if (requestArguments.length() == 0) return
-        val outputStream: OutputStream = httpConnection.outputStream
-        outputStream.write(requestArguments.toString().toByteArray(Charsets.UTF_8))
-        outputStream.close()
+        with(httpConnection) {
+            doInput = true
+            doOutput = true
+            with(outputStream) {
+                write(requestArguments.toString().toByteArray(Charsets.UTF_8))
+                close()
+            }
+        }
     }
 
     /**
@@ -201,16 +203,14 @@ open class ClientImpl(private val clientData: ClientData) : Client {
      * @return [String] String in JSON format with the response.
      */
     private fun processBufferedReader(bufferedReader: BufferedReader): String {
-        val stringBuilder = StringBuilder()
-        var line: String?
-        line = bufferedReader.readLine()
-        while (line != null) {
-            stringBuilder.append("$line\n")
-            line = bufferedReader.readLine()
+        return buildString {
+            var line: String? = bufferedReader.readLine()
+            while (line != null) {
+                append("$line\n")
+                line = bufferedReader.readLine()
+            }
+            bufferedReader.close()
         }
-        bufferedReader.close()
-        stringBuilder.toString()
-        return stringBuilder.toString()
     }
 
     /**
@@ -226,37 +226,40 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         httpVerb: String,
         query: String? = null
     ): HttpURLConnection {
-        val date = Date()
-        val timeStamp: Long = date.time
-        var stringUrl = "${baseUrl}v${apiVersion}/${PARTNER}/${endPoint}"
-        query?.let {
-            stringUrl = "${stringUrl}?${query}"
+        val timeStamp: Long = Date().time
+        val stringUrl = buildString {
+            append("${baseUrl}v${apiVersion}/${PARTNER}/${endPoint}")
+            if (query != null) {
+                append("?${query}")
+            }
         }
+
         val url = URL(stringUrl)
         val httpConnection = url.openConnection() as HttpURLConnection
-        httpConnection.requestMethod = httpVerb
-        httpConnection.connectTimeout = timeOut
-        httpConnection.setRequestProperty(
-            Constants.USER_AGENT.value,
-            Constants.USER_AGENT_ANDROID.value
-        )
-        httpConnection.setRequestProperty(Constants.ACCEPT.value, Constants.APPLICATION_JSON.value)
-        httpConnection.setRequestProperty(
-            Constants.CONTENT_TYPE.value,
-            Constants.APPLICATION_JSON.value
-        )
-        httpConnection.setRequestProperty(Constants.CLIENT_ID.value, clientData.clientId)
-        httpConnection.setRequestProperty(Constants.AUTHORIZATION.value, getApiKey())
-        httpConnection.setRequestProperty(
-            Constants.X_VERYFI_REQUEST_TIMESTAMP.value,
-            timeStamp.toString()
-        )
-        val signature = generateSignature(timeStamp, requestArguments)
-        httpConnection.setRequestProperty(
-            Constants.X_VERYFI_REQUEST_SIGNATURE.value,
-            signature
-        )
-        return httpConnection
+        return httpConnection.apply {
+            requestMethod = httpVerb
+            connectTimeout = timeOut
+            setRequestProperty(
+                Constants.USER_AGENT.value,
+                Constants.USER_AGENT_ANDROID.value
+            )
+            setRequestProperty(Constants.ACCEPT.value, Constants.APPLICATION_JSON.value)
+            setRequestProperty(
+                Constants.CONTENT_TYPE.value,
+                Constants.APPLICATION_JSON.value
+            )
+            setRequestProperty(Constants.CLIENT_ID.value, clientData.clientId)
+            setRequestProperty(Constants.AUTHORIZATION.value, getApiKey())
+            setRequestProperty(
+                Constants.X_VERYFI_REQUEST_TIMESTAMP.value,
+                timeStamp.toString()
+            )
+            val signature = generateSignature(timeStamp, requestArguments)
+            setRequestProperty(
+                Constants.X_VERYFI_REQUEST_SIGNATURE.value,
+                signature
+            )
+        }
     }
 
     /**
@@ -266,15 +269,19 @@ open class ClientImpl(private val clientData: ClientData) : Client {
      * @return Unique signature generated using the client_secret and the payload
      */
     private fun generateSignature(timeStamp: Long, payloadParams: JSONObject): String? {
-        val jsonPayload = JSONObject(payloadParams.toString())
-        jsonPayload.put(Constants.TIMESTAMP.value, timeStamp.toString())
+        val jsonPayload = JSONObject(payloadParams.toString()).apply {
+            put(Constants.TIMESTAMP.value, timeStamp.toString())
+        }
         val payload = jsonPayload.toString()
+
         val secretBytes = clientData.clientSecret.toByteArray(StandardCharsets.UTF_8)
-        val payloadBytes = payload.toByteArray(StandardCharsets.UTF_8)
         val keySpec = SecretKeySpec(secretBytes, SHA256.toString())
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(keySpec)
-        val macBytes: ByteArray = mac.doFinal(payloadBytes)
+
+        val payloadBytes = payload.toByteArray(StandardCharsets.UTF_8)
+        val macBytes = Mac.getInstance("HmacSHA256").run {
+            init(keySpec)
+            doFinal(payloadBytes)
+        }
         return Base64.encodeToString(macBytes, Base64.DEFAULT)
     }
 
@@ -298,16 +305,20 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         fileStream: InputStream, fileName: String, categoriesIn: List<String?>?,
         deleteAfterProcessing: Boolean, parameters: JSONObject?
     ): JSONObject {
-        val categories = JSONArray(if (categoriesIn == null || categoriesIn.isEmpty())
-            LIST_CATEGORIES else categoriesIn)
+        val categories = JSONArray(
+            if (categoriesIn.isNullOrEmpty())
+                LIST_CATEGORIES else categoriesIn
+        )
         val base64EncodedString = Base64.encodeToString(fileStream.readBytes(), Base64.DEFAULT)
         val requestArguments: JSONObject = if (parameters != null)
             JSONObject(parameters.toString()) else JSONObject()
-        requestArguments.put(Constants.FILE_NAME.value, fileName)
-        requestArguments.put(Constants.FILE_DATA.value, base64EncodedString)
-        requestArguments.put(Constants.CATEGORIES.value, categories)
-        requestArguments.put(Constants.AUTO_DELETE.value, deleteAfterProcessing)
-        return requestArguments
+
+        return requestArguments.apply {
+            put(Constants.FILE_NAME.value, fileName)
+            put(Constants.FILE_DATA.value, base64EncodedString)
+            put(Constants.CATEGORIES.value, categories)
+            put(Constants.AUTO_DELETE.value, deleteAfterProcessing)
+        }
     }
 
     /**
@@ -327,23 +338,27 @@ open class ClientImpl(private val clientData: ClientData) : Client {
         deleteAfterProcessing: Boolean, maxPagesToProcess: Int,
         boostMode: Boolean, externalId: String?, parameters: JSONObject?
     ): JSONObject {
-        val categories = JSONArray(if (categoriesIn == null || categoriesIn.isEmpty())
-            LIST_CATEGORIES else categoriesIn)
+        val categories = JSONArray(
+            if (categoriesIn.isNullOrEmpty())
+                LIST_CATEGORIES else categoriesIn
+        )
+
         val requestArguments = if (parameters != null)
             JSONObject(parameters.toString()) else JSONObject()
-        requestArguments.put(Constants.AUTO_DELETE.value, deleteAfterProcessing)
-        requestArguments.put(Constants.BOOST_MODE.value, boostMode)
-        requestArguments.put(Constants.CATEGORIES.value, categories)
-        requestArguments.put(Constants.EXTERNAL_ID.value, externalId)
-        requestArguments.put(Constants.FILE_URL.value, fileUrl)
-        if (fileUrls != null) {
-            requestArguments.put(Constants.FILE_URLS.value, fileUrls)
+        return requestArguments.apply {
+            put(Constants.AUTO_DELETE.value, deleteAfterProcessing)
+            put(Constants.BOOST_MODE.value, boostMode)
+            put(Constants.CATEGORIES.value, categories)
+            put(Constants.EXTERNAL_ID.value, externalId)
+            put(Constants.FILE_URL.value, fileUrl)
+            put(Constants.MAX_PAGES_TO_PROCESS.value, maxPagesToProcess)
+            if (fileUrls != null) {
+                put(Constants.FILE_URLS.value, fileUrls)
+            }
         }
-        requestArguments.put(Constants.MAX_PAGES_TO_PROCESS.value, maxPagesToProcess)
-        return requestArguments
     }
 
-    companion object {
+    private companion object {
         val LIST_CATEGORIES = listOf(
             "Advertising & Marketing",
             "Automotive",
@@ -361,6 +376,10 @@ open class ClientImpl(private val clientData: ClientData) : Client {
             "Job Supplies",
             "Grocery"
         )
+        const val GET = "GET"
+        const val POST = "POST"
+        const val PUT = "PUT"
+        const val DELETE = "DELETE"
         const val TAG = "VeryfiClient"
         const val PARTNER = "partner"
     }
