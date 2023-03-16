@@ -29,7 +29,7 @@ class ClientTest {
     private val clientSecret = "clientSecret"
     private val username = "username"
     private val apiKey = "apiKey"
-    private val receiptPath = "receipt.jpeg"
+    private val receiptPath = "receipt.jpg"
 
     private var client = VeryfiClientFactory.createClient(clientId, clientSecret, username, apiKey)
 
