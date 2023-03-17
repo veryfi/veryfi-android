@@ -103,7 +103,7 @@ class ClientTest {
             client.processDocument(inputStream, receiptPath, categories, true, null, { jsonString ->
                 val jsonResponse = JSONObject(jsonString)
                 assertEquals(
-                    "In-n-out Burger",
+                    "Walgreens",
                     jsonResponse.getJSONObject("vendor").getString("name")
                 )
             }, { errorMessage ->
@@ -161,7 +161,7 @@ class ClientTest {
             val bufferedReader = getFileAsBufferedReader("processDocument.json")
             doReturn(bufferedReader).`when`(client).connect(anyOrNull())
         }
-        val url = "https://veryfi-testing-public.s3.us-west-2.amazonaws.com/receipt.jpg"
+        val url = "https://cdn.veryfi.com/receipts/fd36b2c0-a84d-459c-9d57-c29ac5d14685/21c95fc5-0e5c-48f8-abe0-849e438296bf.jpeg"
         client.processDocumentUrl(
             url,
             null,
@@ -174,7 +174,7 @@ class ClientTest {
             { jsonUrlString ->
                 val jsonURLResponse = JSONObject(jsonUrlString)
                 assertEquals(
-                    "In-n-out Burger",
+                    "Walgreens",
                     jsonURLResponse.getJSONObject("vendor").getString("name")
                 )
             }, { errorMessage ->
@@ -206,7 +206,7 @@ class ClientTest {
                 Assert.fail(errorMessage)
             })
         } else {
-            val url = "https://veryfi-testing-public.s3.us-west-2.amazonaws.com/receipt.jpg"
+            val url = "https://cdn.veryfi.com/receipts/fd36b2c0-a84d-459c-9d57-c29ac5d14685/21c95fc5-0e5c-48f8-abe0-849e438296bf.jpeg"
             val categories: List<String> = listOf("Advertising & Marketing", "Automotive")
             client.processDocumentUrl(
                 url,
