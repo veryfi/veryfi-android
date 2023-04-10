@@ -15,7 +15,7 @@ package manager for Java.
 Add in your project build.gradle file the veryfi android SDK dependency:
 ```ruby
 dependencies {
-    implementation 'com.veryfi:veryfi-android:1.0.6'
+    implementation 'com.veryfi:veryfi-android:1.0.8'
 }
 ```
 
